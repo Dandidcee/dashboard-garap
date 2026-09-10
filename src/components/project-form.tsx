@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { simpanProject } from "@/app/actions";
+import { simpanProject, tambahLedger } from "@/app/actions";
 import { LABEL_JENIS, LABEL_STATUS, LABEL_WL, type Jenis, type Project, type Status, type Wallet, type WlStatus } from "@/lib/types";
 import { ResponsiveModal } from "./responsive-modal";
 import { WalletPicker } from "./wallet-picker";
@@ -57,6 +57,7 @@ export function ProjectForm({
   const [mintPrice, setMintPrice] = useState(String(project?.fields.mint_price ?? ""));
   const [mintDate, setMintDate] = useState(keLocalInput(project?.fields.mint_date));
   const [mintLink, setMintLink] = useState(project?.fields.mint_link ?? "");
+  const [modalAwal, setModalAwal] = useState("");
   const [loading, setLoading] = useState(false);
 
   const punyaJadwalMint = wlStatus === "gtd" || wlStatus === "fcfs";
@@ -75,7 +76,16 @@ export function ProjectForm({
 
     setLoading(true);
     try {
-      await simpanProject({ id: project?.id, nama, jenis, status, link, catatan, walletIds, fields });
+      const res = await simpanProject({ id: project?.id, nama, jenis, status, link, catatan, walletIds, fields });
+      if (!project && jenis === "retro" && Number(modalAwal) > 0) {
+        await tambahLedger({
+          project_id: res.id,
+          tipe: "modal",
+          jumlah: Number(modalAwal),
+          tanggal: new Date().toISOString().slice(0, 10),
+          catatan: "Modal awal",
+        });
+      }
       toast.success(project ? "Perubahan disimpan." : "Garapan ditambahkan.");
       onOpenChange(false);
     } catch (e) {
@@ -193,6 +203,22 @@ export function ProjectForm({
                 Tanggal mint muncul setelah status jadi FCFS atau GTD.
               </p>
             )}
+          </div>
+        )}
+
+        {/* ---- khusus retro (garapan baru doang, modal berikutnya lewat "Catat uang") ---- */}
+        {jenis === "retro" && !project && (
+          <div className="space-y-2 rounded-lg border border-jenis-retro/30 bg-jenis-retro/5 p-3">
+            <Label htmlFor="modal">Modal awal (Rupiah)</Label>
+            <Input
+              id="modal" type="number" min={0} inputMode="numeric"
+              value={modalAwal} onChange={(e) => setModalAwal(e.target.value)}
+              placeholder="Kosongin kalau belum keluar modal"
+            />
+            <p className="text-xs text-muted-foreground">
+              Otomatis kecatat sebagai modal keluar buat rekap profit. Modal tambahan berikutnya
+              dicatat lewat tombol <b>Catat uang</b> di kartu garapannya.
+            </p>
           </div>
         )}
 

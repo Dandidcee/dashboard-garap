@@ -71,7 +71,7 @@ export async function simpanProject(input: ProjectInput) {
   }
 
   segarkan();
-  return { id };
+  return { id: id as string };
 }
 
 export async function hapusProject(id: string) {
