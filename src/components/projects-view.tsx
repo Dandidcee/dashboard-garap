@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { Plus, Search } from "lucide-react";
-import { LABEL_JENIS, LABEL_STATUS, type Jenis, type LedgerEntry, type Project, type Status, type Wallet } from "@/lib/types";
+import { LABEL_JENIS, LABEL_STATUS, LABEL_WL, type Jenis, type LedgerEntry, type Project, type Status, type Wallet, type WlStatus } from "@/lib/types";
 import { ProjectCard } from "./project-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,10 +15,12 @@ const LedgerForm = dynamic(() => import("./ledger-form").then((m) => m.LedgerFor
 
 const TAB: (Jenis | "semua")[] = ["semua", "testnet", "nft", "retro", "general", "daily"];
 const STATUS_TAB: (Status | "semua")[] = ["semua", "belum", "digarap", "selesai", "drop"];
+const WL_TAB: (WlStatus | "semua")[] = ["semua", "belum", "wl", "fcfs", "gtd"];
 
 export function ProjectsView({ projects, wallets, ledger }: { projects: Project[]; wallets: Wallet[]; ledger: LedgerEntry[] }) {
   const [tab, setTab] = useState<string>("semua");
   const [statusTab, setStatusTab] = useState<string>("semua");
+  const [wlTab, setWlTab] = useState<string>("semua");
   const [cari, setCari] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [edit, setEdit] = useState<Project | null>(null);
@@ -29,6 +31,7 @@ export function ProjectsView({ projects, wallets, ledger }: { projects: Project[
     return projects.filter((p) => {
       if (tab !== "semua" && p.jenis !== tab) return false;
       if (statusTab !== "semua" && p.status !== statusTab) return false;
+      if (tab === "nft" && wlTab !== "semua" && (p.fields.wl_status ?? "belum") !== wlTab) return false;
       if (!q) return true;
       return (
         p.nama.toLowerCase().includes(q) ||
@@ -36,7 +39,7 @@ export function ProjectsView({ projects, wallets, ledger }: { projects: Project[
         p.wallets.some((w) => w.label.toLowerCase().includes(q) || (w.address || "").toLowerCase().includes(q))
       );
     });
-  }, [projects, tab, statusTab, cari]);
+  }, [projects, tab, statusTab, wlTab, cari]);
 
   function bukaBaru() {
     setEdit(null);
@@ -78,13 +81,26 @@ export function ProjectsView({ projects, wallets, ledger }: { projects: Project[
             </SelectContent>
           </Select>
         </div>
+
+        {tab === "nft" && (
+          <Select value={wlTab} onValueChange={setWlTab}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {WL_TAB.map((w) => (
+                <SelectItem key={w} value={w}>
+                  {w === "semua" ? "Semua status WL" : LABEL_WL[w as WlStatus]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
       </div>
 
       {hasil.length === 0 ? (
         <div className="rounded-lg border border-dashed border-border py-14 text-center">
-          <p className="font-semibold">{cari || tab !== "semua" || statusTab !== "semua" ? "Gak ada yang cocok" : "Belum ada garapan di sini"}</p>
+          <p className="font-semibold">{cari || tab !== "semua" || statusTab !== "semua" || wlTab !== "semua" ? "Gak ada yang cocok" : "Belum ada garapan di sini"}</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            {cari || tab !== "semua" || statusTab !== "semua" ? "Coba filter atau kata kunci lain." : "Tambahin garapan pertama lo."}
+            {cari || tab !== "semua" || statusTab !== "semua" || wlTab !== "semua" ? "Coba filter atau kata kunci lain." : "Tambahin garapan pertama lo."}
           </p>
           {!cari && tab === "semua" && statusTab === "semua" && (
             <Button className="mt-4" onClick={bukaBaru}>
