@@ -4,13 +4,21 @@ import { useState } from "react";
 import { CheckCircle2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { tandaiDigarap, konfirmasiMint, ubahStatusProject } from "@/app/actions";
-import { LABEL_JENIS, type Project } from "@/lib/types";
+import { LABEL_JENIS, type Project, type Wallet } from "@/lib/types";
 import { cn, pesanError } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { PilihWalletDialog } from "@/components/pilih-wallet-dialog";
 
-export function DueList({ items }: { items: { project: Project; alasan: string; telat: boolean; viaStatus: boolean }[] }) {
+export function DueList({
+  items,
+  wallets,
+}: {
+  items: { project: Project; alasan: string; telat: boolean; viaStatus: boolean }[];
+  wallets: Wallet[];
+}) {
   const [konfirmasiTarget, setKonfirmasiTarget] = useState<Project | null>(null);
+  const [pilihWalletTarget, setPilihWalletTarget] = useState<Project | null>(null);
 
   async function tandaiSudahGarap() {
     if (!konfirmasiTarget) return;
@@ -21,6 +29,19 @@ export function DueList({ items }: { items: { project: Project; alasan: string; 
       toast.error(pesanError(e, "Gagal nyimpen."));
     } finally {
       setKonfirmasiTarget(null);
+    }
+  }
+
+  async function garap(p: Project) {
+    if (p.wallets.length === 0) {
+      setPilihWalletTarget(p);
+      return;
+    }
+    try {
+      await tandaiDigarap(p.id);
+      toast.success(`${p.nama} ditandai digarap.`);
+    } catch (e) {
+      toast.error(pesanError(e, "Gagal nyimpen."));
     }
   }
 
@@ -71,8 +92,7 @@ export function DueList({ items }: { items: { project: Project; alasan: string; 
                 </Button>
               )
             ) : (
-              <Button size="sm" variant="outline" className="shrink-0"
-                onClick={async () => { await tandaiDigarap(p.id); toast.success(`${p.nama} ditandai digarap.`); }}>
+              <Button size="sm" variant="outline" className="shrink-0" onClick={() => garap(p)}>
                 <CheckCircle2 className="mr-1.5 size-4" /> Garap
               </Button>
             )}
@@ -88,6 +108,12 @@ export function DueList({ items }: { items: { project: Project; alasan: string; 
         labelKonfirmasi="Udah digarap"
         variant="default"
         onConfirm={tandaiSudahGarap}
+      />
+
+      <PilihWalletDialog
+        project={pilihWalletTarget}
+        wallets={wallets}
+        onOpenChange={(v) => !v && setPilihWalletTarget(null)}
       />
     </>
   );

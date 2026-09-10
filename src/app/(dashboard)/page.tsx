@@ -1,16 +1,21 @@
 import { Judul } from "@/components/app-shell";
 import { DueSection } from "@/components/due-section";
-import { ProfitChart } from "@/components/profit-chart";
-import { getLedger, getProjects, getSettings } from "@/lib/queries";
+import { ProfitChartLazy } from "@/components/profit-chart-lazy";
+import { getLedger, getProjects, getSettings, getWallets } from "@/lib/queries";
 import { hitungDue, rekapPeriode } from "@/lib/due";
 import { rupiah, tanggalLokal, cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  const [projects, settings, ledger] = await Promise.all([getProjects(), getSettings(), getLedger()]);
+  const [projects, settings, ledger, wallets] = await Promise.all([
+    getProjects(), getSettings(), getLedger(), getWallets(),
+  ]);
 
   const due = hitungDue(projects, settings);
+  const dailyPlan = due.filter((d) => d.project.jenis === "testnet" || d.project.jenis === "daily");
+  const perluDigarap = due.filter((d) => d.project.jenis !== "testnet" && d.project.jenis !== "daily");
+
   const perBulan = rekapPeriode(ledger, "bulan");
   const bulanIni = tanggalLokal(settings.timezone).slice(0, 7);
   const tahunIni = bulanIni.slice(0, 4);
@@ -28,9 +33,18 @@ export default async function DashboardPage() {
       <section className="mb-9">
         <div className="mb-4 flex items-baseline justify-between">
           <h2 className="text-base font-extrabold tracking-tight">Perlu digarap</h2>
-          <span className="hidden text-sm text-muted-foreground tnum md:inline">{due.length} item</span>
+          <span className="hidden text-sm text-muted-foreground tnum md:inline">{perluDigarap.length} item</span>
         </div>
-        <DueSection items={due} />
+        <DueSection items={perluDigarap} wallets={wallets} />
+      </section>
+
+      {/* Testnet & daily: kerjaan rutin, dipisah dari yang di atas biar gak numpuk */}
+      <section className="mb-9">
+        <div className="mb-4 flex items-baseline justify-between">
+          <h2 className="text-base font-extrabold tracking-tight">Daily Plan</h2>
+          <span className="hidden text-sm text-muted-foreground tnum md:inline">{dailyPlan.length} item</span>
+        </div>
+        <DueSection items={dailyPlan} wallets={wallets} />
       </section>
 
       <section className="mb-9 grid grid-cols-2 gap-3 md:grid-cols-3">
@@ -52,7 +66,7 @@ export default async function DashboardPage() {
       <section>
         <h2 className="mb-4 text-base font-extrabold tracking-tight">Profit per bulan</h2>
         <div className="rounded-lg border border-border/70 bg-card p-3">
-          <ProfitChart data={perBulan.slice(-12)} />
+          <ProfitChartLazy data={perBulan.slice(-12)} />
         </div>
       </section>
     </>

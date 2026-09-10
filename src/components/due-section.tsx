@@ -3,16 +3,17 @@
 import { useState } from "react";
 import { ChevronRight, ListChecks } from "lucide-react";
 import type { Due } from "@/lib/due";
+import type { Wallet } from "@/lib/types";
 import { DueList } from "./due-list";
 import { ResponsiveModal, useDesktop } from "./responsive-modal";
 
 /** Di desktop tampil apa adanya (ruang cukup). Di HP diringkes jadi satu card, isinya kebuka lewat popup. */
-export function DueSection({ items }: { items: Due[] }) {
+export function DueSection({ items, wallets }: { items: Due[]; wallets: Wallet[] }) {
   const desktop = useDesktop();
   const [open, setOpen] = useState(false);
 
   if (desktop || items.length === 0) {
-    return <DueList items={items} />;
+    return <DueList items={items} wallets={wallets} />;
   }
 
   const telat = items.filter((i) => i.telat).length;
@@ -35,7 +36,7 @@ export function DueSection({ items }: { items: Due[] }) {
       </button>
 
       <ResponsiveModal open={open} onOpenChange={setOpen} judul="Perlu digarap">
-        <DueList items={items} />
+        <DueList items={items} wallets={wallets} />
       </ResponsiveModal>
     </>
   );

@@ -90,6 +90,19 @@ export async function tandaiDigarap(id: string) {
   segarkan();
 }
 
+/** Sama kayak tandaiDigarap, tapi dipakai pas garapannya belum punya wallet — pasang walletnya sekalian. */
+export async function garapDenganWallet(id: string, walletId: string) {
+  const sb = db();
+  const { error: e1 } = await sb.from("project_wallets").insert({ project_id: id, wallet_id: walletId });
+  if (e1) throw e1;
+  const { error: e2 } = await sb
+    .from("projects")
+    .update({ last_done_at: new Date().toISOString(), last_notif: null })
+    .eq("id", id);
+  if (e2) throw e2;
+  segarkan();
+}
+
 /** Tombol "Konfirmasi" di garapan NFT — menghentikan notif berulang sampai jadwal mint diubah. */
 export async function konfirmasiMint(id: string, fields: Record<string, unknown>) {
   const { error } = await db()

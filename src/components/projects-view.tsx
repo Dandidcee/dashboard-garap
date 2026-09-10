@@ -1,14 +1,17 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { Plus, Search } from "lucide-react";
 import { LABEL_JENIS, LABEL_STATUS, type Jenis, type LedgerEntry, type Project, type Status, type Wallet } from "@/lib/types";
 import { ProjectCard } from "./project-card";
-import { ProjectForm } from "./project-form";
-import { LedgerForm } from "./ledger-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+// Form-form ini gak dibutuhin pas halaman pertama kebuka, baru diunduh pas beneran diklik.
+const ProjectForm = dynamic(() => import("./project-form").then((m) => m.ProjectForm), { ssr: false });
+const LedgerForm = dynamic(() => import("./ledger-form").then((m) => m.LedgerForm), { ssr: false });
 
 const TAB: (Jenis | "semua")[] = ["semua", "testnet", "nft", "retro", "general", "daily"];
 const STATUS_TAB: (Status | "semua")[] = ["semua", "belum", "digarap", "selesai", "drop"];
@@ -95,6 +98,7 @@ export function ProjectsView({ projects, wallets, ledger }: { projects: Project[
             <ProjectCard
               key={p.id} p={p}
               ledger={ledger.filter((l) => l.project_id === p.id)}
+              wallets={wallets}
               onEdit={(x) => { setEdit(x); setFormOpen(true); }}
               onUang={setUang}
             />

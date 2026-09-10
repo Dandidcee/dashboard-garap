@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ExternalLink, MoreVertical, Pencil, Trash2, Coins, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { hapusProject, tandaiDigarap, konfirmasiMint } from "@/app/actions";
-import { LABEL_JENIS, LABEL_STATUS, LABEL_WL, type LedgerEntry, type Project } from "@/lib/types";
+import { LABEL_JENIS, LABEL_STATUS, LABEL_WL, type LedgerEntry, type Project, type Wallet } from "@/lib/types";
 import { rupiah, cn, pesanError } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { PilihWalletDialog } from "@/components/pilih-wallet-dialog";
 import { ResponsiveModal } from "@/components/responsive-modal";
 
 function selisihHari(iso: string | null) {
@@ -35,11 +36,13 @@ function Baris({ label, children }: { label: string; children: React.ReactNode }
 export function ProjectCard({
   p,
   ledger,
+  wallets,
   onEdit,
   onUang,
 }: {
   p: Project;
   ledger: LedgerEntry[];
+  wallets: Wallet[];
   onEdit: (p: Project) => void;
   onUang: (p: Project) => void;
 }) {
@@ -47,6 +50,7 @@ export function ProjectCard({
   const perluTombolGarap = p.jenis === "testnet" || p.jenis === "daily";
   const [konfirmasiHapus, setKonfirmasiHapus] = useState(false);
   const [detail, setDetail] = useState(false);
+  const [pilihWallet, setPilihWallet] = useState(false);
 
   async function konfirmasiHapusProject() {
     try {
@@ -60,6 +64,10 @@ export function ProjectCard({
   }
 
   async function garap() {
+    if (p.wallets.length === 0) {
+      setPilihWallet(true);
+      return;
+    }
     try {
       await tandaiDigarap(p.id);
       toast.success(`${p.nama} ditandai digarap.`);
@@ -307,6 +315,12 @@ export function ProjectCard({
           </div>
         </div>
       </ResponsiveModal>
+
+      <PilihWalletDialog
+        project={pilihWallet ? p : null}
+        wallets={wallets}
+        onOpenChange={setPilihWallet}
+      />
     </>
   );
 }
