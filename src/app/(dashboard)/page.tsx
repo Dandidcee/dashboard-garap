@@ -30,7 +30,7 @@ export default async function DashboardPage() {
           <h2 className="font-bold">Perlu digarap</h2>
           <span className="text-sm text-muted-foreground tnum">{due.length} item</span>
         </div>
-        <DueList items={due.map(({ project, alasan, telat }) => ({ project, alasan, telat }))} />
+        <DueList items={due} />
       </section>
 
       <section className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-3">

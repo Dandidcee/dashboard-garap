@@ -100,6 +100,13 @@ export async function konfirmasiMint(id: string, fields: Record<string, unknown>
   segarkan();
 }
 
+/** Tombol "Mulai garap" di dashboard — buat garapan yang munculnya cuma gara-gara status masih "belum". */
+export async function ubahStatusProject(id: string, status: Status) {
+  const { error } = await db().from("projects").update({ status }).eq("id", id);
+  if (error) throw error;
+  segarkan();
+}
+
 /* ---------------- Wallet ---------------- */
 
 export async function simpanWallet(input: { id?: string; label: string; address?: string; chain?: string; catatan?: string }) {

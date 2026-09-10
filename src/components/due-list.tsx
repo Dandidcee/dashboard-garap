@@ -2,12 +2,12 @@
 
 import { CheckCircle2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
-import { tandaiDigarap, konfirmasiMint } from "@/app/actions";
+import { tandaiDigarap, konfirmasiMint, ubahStatusProject } from "@/app/actions";
 import { LABEL_JENIS, type Project } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-export function DueList({ items }: { items: { project: Project; alasan: string; telat: boolean }[] }) {
+export function DueList({ items }: { items: { project: Project; alasan: string; telat: boolean; viaStatus: boolean }[] }) {
   if (items.length === 0) {
     return (
       <div className="rounded-lg border border-border/70 bg-card p-6 text-center">
@@ -19,7 +19,7 @@ export function DueList({ items }: { items: { project: Project; alasan: string; 
 
   return (
     <ul className="space-y-2">
-      {items.map(({ project: p, alasan, telat }) => (
+      {items.map(({ project: p, alasan, telat, viaStatus }) => (
         <li key={p.id} className="flex items-center gap-3 rounded-lg border border-border/70 bg-card p-3">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
@@ -35,7 +35,15 @@ export function DueList({ items }: { items: { project: Project; alasan: string; 
               {LABEL_JENIS[p.jenis]} · {alasan}
             </p>
           </div>
-          {p.jenis === "nft" ? (
+          {viaStatus ? (
+            <Button size="sm" variant="outline" className="shrink-0"
+              onClick={async () => {
+                await ubahStatusProject(p.id, "digarap");
+                toast.success(`${p.nama} mulai digarap.`);
+              }}>
+              <CheckCircle2 className="mr-1.5 size-4" /> Mulai garap
+            </Button>
+          ) : p.jenis === "nft" ? (
             p.fields.mint_ack ? (
               <span className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-ok">
                 <CheckCircle2 className="size-4" /> Dikonfirmasi
