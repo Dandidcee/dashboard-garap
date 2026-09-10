@@ -3,12 +3,14 @@
 import { useState } from "react";
 import { CheckCircle2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
-import { tandaiDigarap, konfirmasiMint, ubahStatusProject } from "@/app/actions";
+import { tandaiDigarap, konfirmasiMint, ubahStatusProject, garapDenganWallet, ubahStatusDenganWallet } from "@/app/actions";
 import { LABEL_JENIS, type Project, type Wallet } from "@/lib/types";
 import { cn, pesanError } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { PilihWalletDialog } from "@/components/pilih-wallet-dialog";
+
+type PilihWalletMode = "garap" | "status";
 
 export function DueList({
   items,
@@ -18,7 +20,7 @@ export function DueList({
   wallets: Wallet[];
 }) {
   const [konfirmasiTarget, setKonfirmasiTarget] = useState<Project | null>(null);
-  const [pilihWalletTarget, setPilihWalletTarget] = useState<Project | null>(null);
+  const [pilihWallet, setPilihWallet] = useState<{ project: Project; mode: PilihWalletMode } | null>(null);
 
   async function tandaiSudahGarap() {
     if (!konfirmasiTarget) return;
@@ -34,7 +36,7 @@ export function DueList({
 
   async function garap(p: Project) {
     if (p.wallets.length === 0) {
-      setPilihWalletTarget(p);
+      setPilihWallet({ project: p, mode: "garap" });
       return;
     }
     try {
@@ -43,6 +45,14 @@ export function DueList({
     } catch (e) {
       toast.error(pesanError(e, "Gagal nyimpen."));
     }
+  }
+
+  function udahDigarap(p: Project) {
+    if (p.wallets.length === 0) {
+      setPilihWallet({ project: p, mode: "status" });
+      return;
+    }
+    setKonfirmasiTarget(p);
   }
 
   if (items.length === 0) {
@@ -74,7 +84,7 @@ export function DueList({
               </p>
             </div>
             {viaStatus ? (
-              <Button size="sm" variant="outline" className="shrink-0" onClick={() => setKonfirmasiTarget(p)}>
+              <Button size="sm" variant="outline" className="shrink-0" onClick={() => udahDigarap(p)}>
                 <CheckCircle2 className="mr-1.5 size-4" /> Udah digarap
               </Button>
             ) : p.jenis === "nft" ? (
@@ -111,9 +121,14 @@ export function DueList({
       />
 
       <PilihWalletDialog
-        project={pilihWalletTarget}
+        project={pilihWallet?.project ?? null}
         wallets={wallets}
-        onOpenChange={(v) => !v && setPilihWalletTarget(null)}
+        onOpenChange={(v) => !v && setPilihWallet(null)}
+        onSubmit={async (walletId) => {
+          if (!pilihWallet) return;
+          if (pilihWallet.mode === "garap") await garapDenganWallet(pilihWallet.project.id, walletId);
+          else await ubahStatusDenganWallet(pilihWallet.project.id, walletId, "digarap");
+        }}
       />
     </>
   );

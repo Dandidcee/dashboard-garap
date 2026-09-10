@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ExternalLink, MoreVertical, Pencil, Trash2, Coins, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
-import { hapusProject, tandaiDigarap, konfirmasiMint } from "@/app/actions";
+import { hapusProject, tandaiDigarap, konfirmasiMint, garapDenganWallet } from "@/app/actions";
 import { LABEL_JENIS, LABEL_STATUS, LABEL_WL, type LedgerEntry, type Project, type Wallet } from "@/lib/types";
 import { rupiah, cn, pesanError } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -323,6 +323,7 @@ export function ProjectCard({
         project={pilihWallet ? p : null}
         wallets={wallets}
         onOpenChange={setPilihWallet}
+        onSubmit={(walletId) => garapDenganWallet(p.id, walletId)}
       />
     </>
   );

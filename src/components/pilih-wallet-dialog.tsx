@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { garapDenganWallet } from "@/app/actions";
 import type { Wallet } from "@/lib/types";
 import { pesanError } from "@/lib/utils";
 import { ResponsiveModal } from "./responsive-modal";
@@ -12,16 +11,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 /**
  * Muncul kalau garapan mau ditandai digarap tapi belum punya wallet nempel.
- * Milih wallet di sini langsung masangnya ke garapan itu sekalian nandain digarap.
+ * Aksi sesudah milih wallet ditentuin sama pemanggilnya lewat onSubmit —
+ * bisa "tandai digarap" biasa atau "ubah status", tergantung konteksnya.
  */
 export function PilihWalletDialog({
   project,
   wallets,
   onOpenChange,
+  onSubmit,
 }: {
   project: { id: string; nama: string } | null;
   wallets: Wallet[];
   onOpenChange: (v: boolean) => void;
+  onSubmit: (walletId: string) => Promise<void>;
 }) {
   const [walletId, setWalletId] = useState("");
   const [loading, setLoading] = useState(false);
@@ -30,7 +32,7 @@ export function PilihWalletDialog({
     if (!project || !walletId) return;
     setLoading(true);
     try {
-      await garapDenganWallet(project.id, walletId);
+      await onSubmit(walletId);
       toast.success(`${project.nama} ditandai digarap.`);
       setWalletId("");
       onOpenChange(false);
