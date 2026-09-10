@@ -1,6 +1,6 @@
 -- ============================================================
 -- Airdrop Dashboard - skema database
--- Jalanin di Supabase > SQL Editor > New query > Run
+-- Jalanin: psql "$DATABASE_URL" -f supabase/schema.sql
 -- ============================================================
 
 create extension if not exists "pgcrypto";
@@ -68,11 +68,3 @@ create index if not exists idx_projects_jenis   on projects (jenis);
 create index if not exists idx_projects_nama    on projects (lower(nama));
 create index if not exists idx_ledger_project   on ledger (project_id);
 create index if not exists idx_ledger_tanggal   on ledger (tanggal);
-
--- Single-user, diakses lewat service role dari server.
--- Jangan pernah taruh service role key di sisi client.
-alter table wallets         disable row level security;
-alter table projects        disable row level security;
-alter table project_wallets disable row level security;
-alter table ledger          disable row level security;
-alter table settings        disable row level security;

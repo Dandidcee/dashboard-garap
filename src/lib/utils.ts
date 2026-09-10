@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-/** Ambil pesan error asli (server action / Supabase) buat ditampilin di toast, biar gak "gagal, coba lagi" doang. */
+/** Ambil pesan error asli (server action / database) buat ditampilin di toast, biar gak "gagal, coba lagi" doang. */
 export function pesanError(e: unknown, fallback: string) {
   if (e instanceof Error && e.message) return e.message;
   return fallback;

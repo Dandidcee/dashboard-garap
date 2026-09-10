@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { db } from "@/lib/supabase";
+import { db, withTransaction } from "@/lib/db";
 import type { Jenis, Status } from "@/lib/types";
 import { AUTH_COOKIE, authCookieOptions } from "@/lib/auth";
 
@@ -42,109 +42,105 @@ export type ProjectInput = {
 };
 
 export async function simpanProject(input: ProjectInput) {
-  const sb = db();
-  const row = {
-    nama: input.nama.trim(),
-    jenis: input.jenis,
-    status: input.status,
-    link: input.link?.trim() || null,
-    catatan: input.catatan?.trim() || null,
-    fields: input.fields || {},
-  };
+  const nama = input.nama.trim();
+  const link = input.link?.trim() || null;
+  const catatan = input.catatan?.trim() || null;
+  const fields = JSON.stringify(input.fields || {});
 
-  let id = input.id;
-  if (id) {
-    const { error } = await sb.from("projects").update(row).eq("id", id);
-    if (error) throw error;
-  } else {
-    const { data, error } = await sb.from("projects").insert(row).select("id").single();
-    if (error) throw error;
-    id = data.id;
-  }
+  const id = await withTransaction(async (client) => {
+    let id = input.id;
+    if (id) {
+      await client.query(
+        `update projects set nama=$1, jenis=$2, status=$3, link=$4, catatan=$5, fields=$6 where id=$7`,
+        [nama, input.jenis, input.status, link, catatan, fields, id]
+      );
+    } else {
+      const res = await client.query(
+        `insert into projects (nama, jenis, status, link, catatan, fields)
+         values ($1,$2,$3,$4,$5,$6) returning id`,
+        [nama, input.jenis, input.status, link, catatan, fields]
+      );
+      id = res.rows[0].id;
+    }
 
-  await sb.from("project_wallets").delete().eq("project_id", id);
-  if (input.walletIds.length) {
-    const { error } = await sb
-      .from("project_wallets")
-      .insert(input.walletIds.map((wallet_id) => ({ project_id: id, wallet_id })));
-    if (error) throw error;
-  }
+    await client.query(`delete from project_wallets where project_id=$1`, [id]);
+    if (input.walletIds.length) {
+      const placeholders = input.walletIds.map((_, i) => `($1, $${i + 2})`).join(", ");
+      await client.query(
+        `insert into project_wallets (project_id, wallet_id) values ${placeholders}`,
+        [id, ...input.walletIds]
+      );
+    }
+
+    return id as string;
+  });
 
   segarkan();
-  return { id: id as string };
+  return { id };
 }
 
 export async function hapusProject(id: string) {
-  const { error } = await db().from("projects").delete().eq("id", id);
-  if (error) throw error;
+  await db().query("delete from projects where id=$1", [id]);
   segarkan();
 }
 
 /** Tombol "Udah gue garap" — reset hitungan jatuh tempo. */
 export async function tandaiDigarap(id: string) {
-  const { error } = await db()
-    .from("projects")
-    .update({ last_done_at: new Date().toISOString(), last_notif: null })
-    .eq("id", id);
-  if (error) throw error;
+  await db().query("update projects set last_done_at=now(), last_notif=null where id=$1", [id]);
   segarkan();
 }
 
 /** Sama kayak tandaiDigarap, tapi dipakai pas garapannya belum punya wallet — pasang walletnya sekalian. */
 export async function garapDenganWallet(id: string, walletId: string) {
-  const sb = db();
-  const { error: e1 } = await sb.from("project_wallets").insert({ project_id: id, wallet_id: walletId });
-  if (e1) throw e1;
-  const { error: e2 } = await sb
-    .from("projects")
-    .update({ last_done_at: new Date().toISOString(), last_notif: null })
-    .eq("id", id);
-  if (e2) throw e2;
+  await withTransaction(async (client) => {
+    await client.query("insert into project_wallets (project_id, wallet_id) values ($1,$2)", [id, walletId]);
+    await client.query("update projects set last_done_at=now(), last_notif=null where id=$1", [id]);
+  });
   segarkan();
 }
 
 /** Tombol "Konfirmasi" di garapan NFT — menghentikan notif berulang sampai jadwal mint diubah. */
 export async function konfirmasiMint(id: string, fields: Record<string, unknown>) {
-  const { error } = await db()
-    .from("projects")
-    .update({ fields: { ...fields, mint_ack: true }, last_notif: null })
-    .eq("id", id);
-  if (error) throw error;
+  await db().query(
+    "update projects set fields=$2::jsonb, last_notif=null where id=$1",
+    [id, JSON.stringify({ ...fields, mint_ack: true })]
+  );
   segarkan();
 }
 
-/** Tombol "Mulai garap" di dashboard — buat garapan yang munculnya cuma gara-gara status masih "belum". */
+/** Tombol "Udah digarap" di dashboard — buat garapan yang munculnya cuma gara-gara status masih "belum". */
 export async function ubahStatusProject(id: string, status: Status) {
-  const { error } = await db().from("projects").update({ status }).eq("id", id);
-  if (error) throw error;
+  await db().query("update projects set status=$2 where id=$1", [id, status]);
   segarkan();
 }
 
 /* ---------------- Wallet ---------------- */
 
 export async function simpanWallet(input: { id?: string; label: string; address?: string; chain?: string; catatan?: string }) {
-  const sb = db();
-  const row = {
-    label: input.label.trim(),
-    address: input.address?.trim() || null,
-    chain: input.chain?.trim() || null,
-    catatan: input.catatan?.trim() || null,
-  };
+  const label = input.label.trim();
+  const address = input.address?.trim() || null;
+  const chain = input.chain?.trim() || null;
+  const catatan = input.catatan?.trim() || null;
+
   if (input.id) {
-    const { error } = await sb.from("wallets").update(row).eq("id", input.id);
-    if (error) throw error;
+    await db().query(
+      "update wallets set label=$1, address=$2, chain=$3, catatan=$4 where id=$5",
+      [label, address, chain, catatan, input.id]
+    );
     segarkan();
     return { id: input.id };
   }
-  const { data, error } = await sb.from("wallets").insert(row).select("*").single();
-  if (error) throw error;
+
+  const res = await db().query(
+    "insert into wallets (label, address, chain, catatan) values ($1,$2,$3,$4) returning *",
+    [label, address, chain, catatan]
+  );
   segarkan();
-  return { id: data.id as string, wallet: data };
+  return { id: res.rows[0].id as string, wallet: res.rows[0] };
 }
 
 export async function hapusWallet(id: string) {
-  const { error } = await db().from("wallets").delete().eq("id", id);
-  if (error) throw error;
+  await db().query("delete from wallets where id=$1", [id]);
   segarkan();
 }
 
@@ -157,20 +153,15 @@ export async function tambahLedger(input: {
   tanggal: string;
   catatan?: string;
 }) {
-  const { error } = await db().from("ledger").insert({
-    project_id: input.project_id,
-    tipe: input.tipe,
-    jumlah: input.jumlah,
-    tanggal: input.tanggal,
-    catatan: input.catatan?.trim() || null,
-  });
-  if (error) throw error;
+  await db().query(
+    "insert into ledger (project_id, tipe, jumlah, tanggal, catatan) values ($1,$2,$3,$4,$5)",
+    [input.project_id, input.tipe, input.jumlah, input.tanggal, input.catatan?.trim() || null]
+  );
   segarkan();
 }
 
 export async function hapusLedger(id: string) {
-  const { error } = await db().from("ledger").delete().eq("id", id);
-  if (error) throw error;
+  await db().query("delete from ledger where id=$1", [id]);
   segarkan();
 }
 
@@ -183,10 +174,10 @@ export async function simpanSettings(input: {
   daily_jam: number;
   nft_jam: number;
 }) {
-  const { error } = await db()
-    .from("settings")
-    .update({ ...input, updated_at: new Date().toISOString() })
-    .eq("id", 1);
-  if (error) throw error;
+  await db().query(
+    `update settings set timezone=$1, testnet_jam=$2, testnet_interval_hari=$3, daily_jam=$4, nft_jam=$5, updated_at=now()
+     where id=1`,
+    [input.timezone, input.testnet_jam, input.testnet_interval_hari, input.daily_jam, input.nft_jam]
+  );
   segarkan();
 }

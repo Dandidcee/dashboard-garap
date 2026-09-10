@@ -1,15 +1,21 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/supabase";
+import { db } from "@/lib/db";
 
 export async function POST(req: Request) {
   const sub = await req.json();
-  const { error } = await db().from("settings").update({ push_subscription: sub }).eq("id", 1);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ ok: true });
+  try {
+    await db().query("update settings set push_subscription=$1::jsonb where id=1", [JSON.stringify(sub)]);
+    return NextResponse.json({ ok: true });
+  } catch (e) {
+    return NextResponse.json({ error: (e as Error).message }, { status: 500 });
+  }
 }
 
 export async function DELETE() {
-  const { error } = await db().from("settings").update({ push_subscription: null }).eq("id", 1);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ ok: true });
+  try {
+    await db().query("update settings set push_subscription=null where id=1");
+    return NextResponse.json({ ok: true });
+  } catch (e) {
+    return NextResponse.json({ error: (e as Error).message }, { status: 500 });
+  }
 }

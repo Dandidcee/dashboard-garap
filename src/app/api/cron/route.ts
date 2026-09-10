@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import webpush from "web-push";
-import { db } from "@/lib/supabase";
+import { db } from "@/lib/db";
 import { getProjects, getSettings } from "@/lib/queries";
 import { hitungDue } from "@/lib/due";
 import { jamLokal } from "@/lib/utils";
@@ -81,13 +81,13 @@ export async function GET(req: Request) {
 
     try {
       await kirim(settings.push_subscription, judul, alasan, p.fields.mint_link || p.link || "/");
-      await db().from("projects").update({ last_notif: now.toISOString() }).eq("id", p.id);
+      await db().query("update projects set last_notif=$2 where id=$1", [p.id, now.toISOString()]);
       dikirim.push(p.nama);
     } catch (e) {
       // langganan sudah kedaluwarsa -> bersihkan supaya gak error terus
       const status = (e as { statusCode?: number }).statusCode;
       if (status === 404 || status === 410) {
-        await db().from("settings").update({ push_subscription: null }).eq("id", 1);
+        await db().query("update settings set push_subscription=null where id=1");
         return NextResponse.json({ error: "langganan kedaluwarsa, nyalakan ulang di Pengaturan" }, { status: 200 });
       }
     }

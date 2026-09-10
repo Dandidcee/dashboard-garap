@@ -8,8 +8,7 @@ Punya pengingat otomatis lewat notifikasi HP, rekap profit per bulan/tahun, dan 
 ## Yang perlu disiapin
 
 - Node 20+
-- Akun Supabase (free tier cukup)
-- Akun Vercel (free tier cukup, sekaligus buat penjadwal notifikasi)
+- Server Postgres (14+) — bisa di VPS sendiri, atau lokal buat development
 
 ## Pemasangan
 
@@ -25,14 +24,18 @@ Komponen dasar shadcn sengaja tidak ikut di repo ini supaya versinya selalu ikut
 Jalanin sekali:
 
 ```bash
-npx shadcn@latest add button input label textarea select tabs badge dialog drawer dropdown-menu sonner card
+npx shadcn@latest add button input label textarea select tabs badge dialog drawer dropdown-menu sonner card alert-dialog
 ```
 
 Kalau ditanya soal menimpa `components.json` atau `globals.css`, **pilih no** — dua file itu sudah disetel tema navy-emas.
 
 ### 3. Database
 
-Buka Supabase → **SQL Editor** → **New query** → tempel isi `supabase/schema.sql` → **Run**.
+Bikin database Postgres kosong (`createdb airdrop` atau lewat panel VPS-nya), terus jalanin schema-nya:
+
+```bash
+psql "postgres://user:password@host:5432/airdrop" -f db/schema.sql
+```
 
 ### 4. Isi environment
 
@@ -44,12 +47,12 @@ Isi yang perlu:
 
 | Variabel | Ambil dari |
 |---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase → Project Settings → API |
-| `SUPABASE_SERVICE_ROLE_KEY` | halaman yang sama, bagian `service_role` |
+| `DATABASE_URL` | connection string Postgres kamu, format `postgres://user:pass@host:5432/db` |
 | `APP_PASSWORD` | bebas, ini password buat masuk dashboard |
 | `NEXT_PUBLIC_VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | `npx web-push generate-vapid-keys` |
 | `VAPID_SUBJECT` | `mailto:` + email lo |
-| `CRON_SECRET` | bebas |
+| `CRON_SECRET` | bebas, dipakai buat manggil `/api/cron` dari luar |
+| `PROJECTS_API_KEY` | bebas, dipakai script eksternal buat nambah/update garapan lewat `/api/projects` |
 
 ### 5. Jalanin
 
@@ -57,14 +60,30 @@ Isi yang perlu:
 npm run dev
 ```
 
-### 6. Deploy
+### 6. Deploy ke VPS
 
-Push ke GitHub → import di Vercel → salin semua isi `.env.local` ke **Environment Variables** → Deploy.
-`vercel.json` sudah mendaftarkan cron tiap jam, otomatis aktif setelah deploy pertama.
+```bash
+npm run build
+npm run start   # jalan di port 3000, taruh di belakang nginx/reverse proxy
+```
+
+Enaknya pakai process manager biar tetep jalan abis restart server, misal `pm2`:
+
+```bash
+pm2 start npm --name rekap-airdrop -- run start
+pm2 save
+```
+
+**Cron notifikasi** gak ada di VPS biasa (beda sama Vercel/Netlify yang punya scheduled function bawaan) —
+daftarin sendiri lewat `crontab -e`:
+
+```cron
+*/30 * * * * curl -s -H "Authorization: Bearer ISI_CRON_SECRET_DI_SINI" https://domain-kamu.com/api/cron
+```
 
 ### 7. Nyalain notifikasi di HP
 
-1. Buka URL Vercel-nya di **Chrome Android**
+1. Buka URL domain kamu di **Chrome Android**
 2. Menu titik tiga → **Add to Home screen** (biar jalan kayak aplikasi)
 3. Buka dari home screen → **Pengaturan** → **Nyalakan**
 4. Tekan **Kirim notif percobaan** buat mastiin
@@ -91,9 +110,8 @@ Notifnya bisa diklik langsung ke link project. Di dashboard, tiap garapan testne
 punya tombol **Garap** yang nge-reset hitungan; garapan NFT punya tombol **Konfirmasi**
 yang menghentikan notif berulang.
 
-> Vercel Hobby (free) tier membatasi cron ke sekali per hari untuk beberapa akun — kalau
-> notif 30 menitan ini gak konsisten kekirim di production, cek plan Vercel-nya (Pro
-> ngedukung jadwal cron sesering ini tanpa batasan itu).
+> Di VPS, notif 30-menitan ini seakurat cron job yang kamu daftarin (lihat bagian Deploy ke VPS
+> di atas) — gak ada batasan platform kayak di Vercel/Netlify.
 
 ## Kenapa profit disimpan di tabel terpisah
 
@@ -102,25 +120,48 @@ di project. Satu project bisa cair berkali-kali di bulan berbeda — kalau cuma 
 rekap bulanan dan tahunan gak mungkin dihitung. Angka profit di kartu project dijumlah
 otomatis dari tabel ini.
 
+## Nambah/update garapan dari luar
+
+`POST /api/projects` nerima JSON dari script eksternal (misal automasi testnet), dilindungi API key:
+
+```bash
+curl -X POST https://domain-kamu.com/api/projects \
+  -H "Authorization: Bearer ISI_PROJECTS_API_KEY_DI_SINI" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nama": "Monad",
+    "jenis": "testnet",
+    "status": "digarap",
+    "walletIds": ["uuid-wallet-yang-udah-ada"],
+    "fields": { "interval_hari": 3 }
+  }'
+```
+
+Sertain `"id"` (uuid project yang udah ada) buat update, bukan bikin baru. `jenis` wajib salah satu dari
+`testnet | nft | retro | general | daily`. Balesnya `{ "ok": true, "id": "..." }`.
+
 ## Struktur
 
 ```
 src/
   app/
-    page.tsx              ringkasan: yang perlu digarap + profit
-    projects/page.tsx     daftar garapan, filter per jenis, pencarian
-    wallets/page.tsx      wallet dipakai lintas garapan
-    settings/page.tsx     jam notifikasi tiap jenis
-    actions.ts            semua operasi tulis ke database
-    api/cron/route.ts     pengirim notifikasi
+    (dashboard)/
+      page.tsx             ringkasan: yang perlu digarap + profit
+      projects/page.tsx    daftar garapan, filter per jenis & status, pencarian
+      wallets/page.tsx     wallet dipakai lintas garapan
+      settings/page.tsx    jam notifikasi tiap jenis
+    actions.ts             semua operasi tulis ke database (Server Actions)
+    api/cron/route.ts      pengirim notifikasi
+    api/projects/route.ts  endpoint buat script eksternal
   lib/
-    due.ts                penentu jatuh tempo — dipakai layar & cron, jadi selalu sama
-    queries.ts            baca data
-supabase/schema.sql
+    db.ts                  koneksi Postgres (pg) + helper transaksi
+    due.ts                 penentu jatuh tempo — dipakai layar & cron, jadi selalu sama
+    queries.ts             baca data
+db/schema.sql
 ```
 
 ## Catatan
 
-- Aplikasi ini single-user. Service role key hanya dipakai di server, jangan pernah dibawa ke client.
-- Login cuma password sederhana lewat cookie. Kalau mau lebih ketat, pasang Vercel Authentication di Project Settings.
+- Aplikasi ini single-user. `DATABASE_URL` dan `PROJECTS_API_KEY` cuma dipakai di server, jangan pernah dibawa ke client.
+- Login cuma password sederhana lewat cookie.
 - Notifikasi tersimpan per perangkat. Kalau ganti HP, nyalain ulang dari halaman Pengaturan.
