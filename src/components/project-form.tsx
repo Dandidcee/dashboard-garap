@@ -13,13 +13,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn, pesanError } from "@/lib/utils";
 
-const JENIS: Jenis[] = ["testnet", "nft", "general", "daily"];
+const JENIS: Jenis[] = ["testnet", "nft", "retro", "general", "daily"];
 const STATUS: Status[] = ["belum", "digarap", "selesai", "drop"];
 const WL: WlStatus[] = ["belum", "wl", "fcfs", "gtd"];
 
 const garisJenis: Record<Jenis, string> = {
   testnet: "border-jenis-testnet bg-jenis-testnet/10 text-jenis-testnet",
   nft: "border-jenis-nft bg-jenis-nft/10 text-jenis-nft",
+  retro: "border-jenis-retro bg-jenis-retro/10 text-jenis-retro",
   general: "border-jenis-general bg-jenis-general/10 text-jenis-general",
   daily: "border-jenis-daily bg-jenis-daily/10 text-jenis-daily",
 };
@@ -94,7 +95,7 @@ export function ProjectForm({
       <div className="space-y-5">
         <div className="space-y-2">
           <Label>Jenis</Label>
-          <div className="grid grid-cols-4 gap-1.5">
+          <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-5">
             {JENIS.map((j) => (
               <button
                 key={j}

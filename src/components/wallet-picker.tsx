@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { simpanWallet } from "@/app/actions";
 import type { Wallet } from "@/lib/types";
 import { pesanError } from "@/lib/utils";
+import { CHAIN_PRESET } from "@/lib/chains";
+import { ComboboxInput } from "./combobox-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -86,21 +88,19 @@ export function WalletPicker({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width] max-h-72 overflow-y-auto">
-            {semua.length > 5 && (
-              <div className="sticky top-0 z-10 -mx-1 -mt-1 mb-1 bg-popover p-1.5">
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    value={cari}
-                    onChange={(e) => setCari(e.target.value)}
-                    onKeyDown={(e) => e.stopPropagation()}
-                    placeholder="Cari wallet..."
-                    className="h-8 pl-8 text-sm"
-                    autoFocus
-                  />
-                </div>
+            <div className="sticky top-0 z-10 -mx-1 -mt-1 mb-1 bg-popover p-1.5">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={cari}
+                  onChange={(e) => setCari(e.target.value)}
+                  onKeyDown={(e) => e.stopPropagation()}
+                  placeholder="Cari wallet..."
+                  className="h-8 pl-8 text-sm"
+                  autoFocus
+                />
               </div>
-            )}
+            </div>
             {terfilter.length === 0 ? (
               <p className="px-2 py-3 text-center text-xs text-muted-foreground">Gak ketemu.</p>
             ) : (
@@ -124,7 +124,12 @@ export function WalletPicker({
         <div className="space-y-2 rounded-lg border border-border p-3">
           <Input placeholder="Label, misal: Wallet 1" value={label} onChange={(e) => setLabel(e.target.value)} />
           <Input placeholder="Alamat (opsional)" value={address} onChange={(e) => setAddress(e.target.value)} />
-          <Input placeholder="Chain (opsional)" value={chain} onChange={(e) => setChain(e.target.value)} />
+          <ComboboxInput
+            value={chain}
+            onChange={setChain}
+            options={[...new Set([...CHAIN_PRESET, ...semua.map((w) => w.chain).filter((c): c is string => !!c)])]}
+            placeholder="Chain (opsional)"
+          />
           <div className="flex gap-2">
             <Button type="button" size="sm" onClick={tambah} disabled={loading}>
               Simpan wallet

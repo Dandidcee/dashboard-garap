@@ -19,7 +19,7 @@ create table if not exists wallets (
 create table if not exists projects (
   id           uuid primary key default gen_random_uuid(),
   nama         text not null,
-  jenis        text not null check (jenis in ('testnet','nft','general','daily')),
+  jenis        text not null check (jenis in ('testnet','nft','retro','general','daily')),
   status       text not null default 'belum' check (status in ('belum','digarap','selesai','drop')),
   link         text,
   catatan      text,

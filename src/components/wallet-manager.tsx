@@ -8,6 +8,8 @@ import type { Project, Wallet } from "@/lib/types";
 import { pesanError } from "@/lib/utils";
 import { ResponsiveModal } from "./responsive-modal";
 import { ConfirmDialog } from "./confirm-dialog";
+import { ComboboxInput } from "./combobox-input";
+import { CHAIN_PRESET } from "@/lib/chains";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +23,7 @@ export function WalletManager({ wallets, projects }: { wallets: Wallet[]; projec
   const [hapusTarget, setHapusTarget] = useState<Wallet | null>(null);
 
   const dipakai = (id: string) => projects.filter((p) => p.wallets.some((w) => w.id === id)).length;
+  const chainOptions = [...new Set([...CHAIN_PRESET, ...wallets.map((w) => w.chain).filter((c): c is string => !!c)])];
 
   async function konfirmasiHapusWallet() {
     if (!hapusTarget) return;
@@ -100,7 +103,7 @@ export function WalletManager({ wallets, projects }: { wallets: Wallet[]; projec
           </div>
           <div className="space-y-2">
             <Label htmlFor="wc">Chain</Label>
-            <Input id="wc" value={chain} onChange={(e) => setChain(e.target.value)} placeholder="EVM, Solana, ..." />
+            <ComboboxInput id="wc" value={chain} onChange={setChain} options={chainOptions} placeholder="EVM, Solana, ..." />
           </div>
           <Button onClick={tambah} disabled={loading} className="w-full">
             {loading ? "Menyimpan..." : "Tambah wallet"}

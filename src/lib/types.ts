@@ -1,4 +1,4 @@
-export type Jenis = "testnet" | "nft" | "general" | "daily";
+export type Jenis = "testnet" | "nft" | "retro" | "general" | "daily";
 export type Status = "belum" | "digarap" | "selesai" | "drop";
 export type WlStatus = "gtd" | "fcfs" | "wl" | "belum";
 
@@ -60,6 +60,7 @@ export type Settings = {
 export const LABEL_JENIS: Record<Jenis, string> = {
   testnet: "Testnet",
   nft: "NFT",
+  retro: "Retro",
   general: "General",
   daily: "Daily",
 };

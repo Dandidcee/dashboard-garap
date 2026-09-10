@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const TAB: (Jenis | "semua")[] = ["semua", "testnet", "nft", "general", "daily"];
+const TAB: (Jenis | "semua")[] = ["semua", "testnet", "nft", "retro", "general", "daily"];
 
 export function ProjectsView({ projects, wallets }: { projects: Project[]; wallets: Wallet[] }) {
   const [tab, setTab] = useState<string>("semua");

@@ -24,6 +24,7 @@ export default {
         jenis: {
           testnet: "hsl(var(--jenis-testnet))",
           nft: "hsl(var(--jenis-nft))",
+          retro: "hsl(var(--jenis-retro))",
           general: "hsl(var(--jenis-general))",
           daily: "hsl(var(--jenis-daily))",
         },
