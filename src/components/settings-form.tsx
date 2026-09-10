@@ -60,7 +60,7 @@ export function SettingsForm({ awal }: { awal: Settings }) {
       </div>
 
       <div className="space-y-4 rounded-lg border border-jenis-testnet/30 bg-jenis-testnet/5 p-4">
-        <p className="text-sm font-bold">Testnet</p>
+        <p className="text-sm font-bold tracking-tight">Testnet</p>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="tj">Jam notifikasi</Label>
@@ -78,7 +78,7 @@ export function SettingsForm({ awal }: { awal: Settings }) {
       </div>
 
       <div className="space-y-4 rounded-lg border border-jenis-daily/30 bg-jenis-daily/5 p-4">
-        <p className="text-sm font-bold">Daily</p>
+        <p className="text-sm font-bold tracking-tight">Daily</p>
         <div className="space-y-2 sm:max-w-[50%]">
           <Label htmlFor="dj">Jam notifikasi harian</Label>
           <PilihJam id="dj" value={s.daily_jam} onChange={(n) => setS({ ...s, daily_jam: n })} />
@@ -86,7 +86,7 @@ export function SettingsForm({ awal }: { awal: Settings }) {
       </div>
 
       <div className="space-y-4 rounded-lg border border-jenis-nft/30 bg-jenis-nft/5 p-4">
-        <p className="text-sm font-bold">NFT</p>
+        <p className="text-sm font-bold tracking-tight">NFT</p>
         <div className="space-y-2 sm:max-w-[60%]">
           <Label htmlFor="nj">Mulai ingetin berapa jam sebelum mint</Label>
           <Input

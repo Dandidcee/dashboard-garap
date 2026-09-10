@@ -28,7 +28,7 @@ export function DueSection({ items }: { items: Due[] }) {
           <ListChecks className="size-5" />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block font-bold tnum">{items.length} garapan perlu digarap</span>
+          <span className="block font-bold tracking-tight tnum">{items.length} garapan perlu digarap</span>
           {telat > 0 && <span className="block text-xs font-semibold text-destructive">{telat} udah telat</span>}
         </span>
         <ChevronRight className="size-5 shrink-0 text-muted-foreground" />

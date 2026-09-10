@@ -66,7 +66,7 @@ export function WalletManager({ wallets, projects }: { wallets: Wallet[]; projec
           {wallets.map((w) => (
             <li key={w.id} className="flex items-center gap-3 rounded-lg border border-border/70 bg-card p-3">
               <div className="min-w-0 flex-1">
-                <p className="font-semibold leading-tight">{w.label}</p>
+                <p className="font-semibold leading-tight tracking-tight">{w.label}</p>
                 <p className="truncate text-xs text-muted-foreground">
                   {w.address || "tanpa alamat"}{w.chain ? ` · ${w.chain}` : ""}
                 </p>

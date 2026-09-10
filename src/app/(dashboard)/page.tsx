@@ -25,23 +25,23 @@ export default async function DashboardPage() {
       <Judul sub={`${aktif} garapan jalan · ${projects.length} total`}>Ringkasan</Judul>
 
       {/* Yang paling sering dicari: apa yang harus digarap sekarang */}
-      <section className="mb-8">
-        <div className="mb-3 flex items-baseline justify-between">
-          <h2 className="font-bold">Perlu digarap</h2>
+      <section className="mb-9">
+        <div className="mb-4 flex items-baseline justify-between">
+          <h2 className="text-base font-extrabold tracking-tight">Perlu digarap</h2>
           <span className="hidden text-sm text-muted-foreground tnum md:inline">{due.length} item</span>
         </div>
         <DueSection items={due} />
       </section>
 
-      <section className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-3">
+      <section className="mb-9 grid grid-cols-2 gap-3 md:grid-cols-3">
         {[
           { label: "Profit bulan ini", nilai: profitBulan },
           { label: "Profit tahun ini", nilai: profitTahun },
           { label: "Total sejak awal", nilai: total },
         ].map((k) => (
           <div key={k.label} className="rounded-lg border border-border/70 bg-card p-4 last:col-span-2 md:last:col-span-1">
-            <p className="text-xs text-muted-foreground">{k.label}</p>
-            <p className={cn("mt-1 text-xl font-extrabold tnum md:text-2xl",
+            <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{k.label}</p>
+            <p className={cn("mt-1.5 text-xl font-extrabold tracking-tight tnum md:text-2xl",
               k.nilai > 0 ? "text-primary" : k.nilai < 0 ? "text-destructive" : "")}>
               {rupiah(k.nilai)}
             </p>
@@ -50,7 +50,7 @@ export default async function DashboardPage() {
       </section>
 
       <section>
-        <h2 className="mb-3 font-bold">Profit per bulan</h2>
+        <h2 className="mb-4 text-base font-extrabold tracking-tight">Profit per bulan</h2>
         <div className="rounded-lg border border-border/70 bg-card p-3">
           <ProfitChart data={perBulan.slice(-12)} />
         </div>

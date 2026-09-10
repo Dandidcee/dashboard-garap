@@ -92,7 +92,7 @@ export function ProjectCard({
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h3 className="truncate font-bold leading-tight">{p.nama}</h3>
+                <h3 className="truncate font-bold leading-tight tracking-tight">{p.nama}</h3>
                 {p.link && (
                   <a href={p.link} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}
                      className="text-muted-foreground hover:text-primary">
@@ -153,8 +153,8 @@ export function ProjectCard({
 
           <div className="flex items-end justify-between gap-3 border-t border-border/60 pt-3">
             <div>
-              <p className="text-[11px] text-muted-foreground">Profit</p>
-              <p className={cn("text-base font-extrabold tnum", p.profit > 0 ? "text-ok" : p.profit < 0 ? "text-destructive" : "")}>
+              <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Profit</p>
+              <p className={cn("mt-0.5 text-base font-extrabold tracking-tight tnum", p.profit > 0 ? "text-ok" : p.profit < 0 ? "text-destructive" : "")}>
                 {rupiah(p.profit)}
               </p>
               {p.modal > 0 && (
@@ -236,7 +236,7 @@ export function ProjectCard({
           )}
 
           <div>
-            <p className="mb-2 text-sm font-bold">Wallet ({p.wallets.length})</p>
+            <p className="mb-2 text-sm font-bold tracking-tight">Wallet ({p.wallets.length})</p>
             {p.wallets.length === 0 ? (
               <p className="text-sm text-muted-foreground">Belum ada wallet dipasang.</p>
             ) : (
@@ -253,8 +253,8 @@ export function ProjectCard({
 
           <div>
             <div className="mb-2 flex items-baseline justify-between">
-              <p className="text-sm font-bold">Uang</p>
-              <p className={cn("text-lg font-extrabold tnum", p.profit > 0 ? "text-ok" : p.profit < 0 ? "text-destructive" : "")}>
+              <p className="text-sm font-bold tracking-tight">Uang</p>
+              <p className={cn("text-lg font-extrabold tracking-tight tnum", p.profit > 0 ? "text-ok" : p.profit < 0 ? "text-destructive" : "")}>
                 {rupiah(p.profit)}
               </p>
             </div>

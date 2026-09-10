@@ -12,7 +12,7 @@ export default async function SettingsPage() {
       <Judul sub="Atur kapan tiap jenis garapan mengingatkan lo.">Pengaturan</Judul>
 
       <section className="mb-8 rounded-lg border border-border/70 bg-card p-4">
-        <h2 className="mb-3 font-bold">Notifikasi di perangkat ini</h2>
+        <h2 className="mb-3 text-base font-extrabold tracking-tight">Notifikasi di perangkat ini</h2>
         <PushToggle />
       </section>
 

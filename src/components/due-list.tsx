@@ -40,7 +40,7 @@ export function DueList({ items }: { items: { project: Project; alasan: string; 
           <li key={p.id} className="flex items-center gap-3 rounded-lg border border-border/70 bg-card p-3">
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5">
-                <p className="truncate font-bold leading-tight">{p.nama}</p>
+                <p className="truncate font-bold leading-tight tracking-tight">{p.nama}</p>
                 {(p.fields.mint_link || p.link) && (
                   <a href={p.fields.mint_link || p.link!} target="_blank" rel="noreferrer"
                      className="shrink-0 text-muted-foreground hover:text-primary">
