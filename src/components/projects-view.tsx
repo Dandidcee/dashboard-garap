@@ -125,9 +125,10 @@ export function ProjectsView({ projects, wallets, ledger }: { projects: Project[
       {/* Tombol tambah: melayang di HP, biasa di desktop */}
       <Button
         onClick={bukaBaru}
-        className="fixed bottom-20 right-4 z-30 h-14 px-5 shadow-lg md:bottom-8 md:right-8"
+        aria-label="Tambah garapan"
+        className="fixed bottom-20 right-4 z-30 h-14 w-14 rounded-md p-0 shadow-lg md:bottom-8 md:right-8"
       >
-        <Plus className="mr-1.5 size-5" /> Garapan
+        <Plus className="size-6" />
       </Button>
 
       {formOpen && (

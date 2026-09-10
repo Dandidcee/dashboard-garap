@@ -95,8 +95,12 @@ export function WalletManager({ wallets, projects }: { wallets: Wallet[]; projec
         </ul>
       )}
 
-      <Button onClick={() => setOpen(true)} className="fixed bottom-20 right-4 z-30 h-14 px-5 shadow-lg md:bottom-8 md:right-8">
-        <Plus className="mr-1.5 size-5" /> Wallet
+      <Button
+        onClick={() => setOpen(true)}
+        aria-label="Tambah wallet"
+        className="fixed bottom-20 right-4 z-30 h-14 w-14 rounded-md p-0 shadow-lg md:bottom-8 md:right-8"
+      >
+        <Plus className="size-6" />
       </Button>
 
       <ResponsiveModal open={open} onOpenChange={setOpen} judul="Wallet baru">
