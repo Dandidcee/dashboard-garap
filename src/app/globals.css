@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Tema: navy tinta + aksen kuning emas, ada varian terang & gelap.
+   Navy/gold dipakai supaya angka uang jadi salah satu yang menonjol. */
+@layer base {
+  :root {
+    --background: 220 25% 97%;
+    --foreground: 225 30% 14%;
+    --card: 0 0% 100%;
+    --card-foreground: 225 30% 14%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 225 30% 14%;
+    --primary: 38 85% 48%;
+    --primary-foreground: 30 45% 12%;
+    --secondary: 220 20% 93%;
+    --secondary-foreground: 225 30% 16%;
+    --muted: 220 16% 93%;
+    --muted-foreground: 220 10% 40%;
+    --accent: 220 20% 91%;
+    --accent-foreground: 225 30% 16%;
+    --destructive: 358 70% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 18% 87%;
+    --input: 220 18% 87%;
+    --ring: 38 85% 48%;
+    --radius: 0.75rem;
+
+    --jenis-testnet: 199 80% 40%;
+    --jenis-nft: 276 55% 50%;
+    --jenis-general: 158 55% 34%;
+    --jenis-daily: 38 85% 45%;
+
+    --ok: 152 55% 32%;
+    --warn: 25 85% 42%;
+  }
+
+  .dark {
+    --background: 225 30% 12%;
+    --foreground: 220 25% 92%;
+    --card: 224 28% 16%;
+    --card-foreground: 220 25% 92%;
+    --popover: 224 30% 14%;
+    --popover-foreground: 220 25% 92%;
+    --primary: 41 89% 61%;
+    --primary-foreground: 225 40% 12%;
+    --secondary: 224 22% 22%;
+    --secondary-foreground: 220 25% 92%;
+    --muted: 224 20% 22%;
+    --muted-foreground: 220 12% 62%;
+    --accent: 224 24% 24%;
+    --accent-foreground: 220 25% 92%;
+    --destructive: 358 68% 56%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 224 20% 26%;
+    --input: 224 20% 26%;
+    --ring: 41 89% 61%;
+
+    --jenis-testnet: 199 84% 58%;
+    --jenis-nft: 276 62% 66%;
+    --jenis-general: 158 54% 52%;
+    --jenis-daily: 41 89% 61%;
+
+    --ok: 152 48% 48%;
+    --warn: 25 88% 60%;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv11", "ss01";
+    transition: background-color .2s ease, color .2s ease;
+  }
+  /* angka uang selalu rata kolom */
+  .tnum { font-variant-numeric: tabular-nums; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+}
