@@ -31,6 +31,8 @@
     "web-push": "^3.6.7"
   },
   "devDependencies": {
+    "@netlify/functions": "^6.0.0",
+    "@netlify/plugin-nextjs": "^5.15.13",
     "@types/node": "^22.10.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
