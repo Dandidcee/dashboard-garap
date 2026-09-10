@@ -7,6 +7,7 @@ import { hapusWallet, simpanWallet } from "@/app/actions";
 import type { Project, Wallet } from "@/lib/types";
 import { pesanError } from "@/lib/utils";
 import { ResponsiveModal } from "./responsive-modal";
+import { ConfirmDialog } from "./confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,8 +18,21 @@ export function WalletManager({ wallets, projects }: { wallets: Wallet[]; projec
   const [address, setAddress] = useState("");
   const [chain, setChain] = useState("");
   const [loading, setLoading] = useState(false);
+  const [hapusTarget, setHapusTarget] = useState<Wallet | null>(null);
 
   const dipakai = (id: string) => projects.filter((p) => p.wallets.some((w) => w.id === id)).length;
+
+  async function konfirmasiHapusWallet() {
+    if (!hapusTarget) return;
+    try {
+      await hapusWallet(hapusTarget.id);
+      toast.success(`${hapusTarget.label} dihapus.`);
+    } catch (e) {
+      toast.error(pesanError(e, "Gagal menghapus."));
+    } finally {
+      setHapusTarget(null);
+    }
+  }
 
   async function tambah() {
     if (!label.trim()) return toast.error("Label wallet belum diisi.");
@@ -62,7 +76,7 @@ export function WalletManager({ wallets, projects }: { wallets: Wallet[]; projec
                 </Button>
               )}
               <Button variant="ghost" size="icon" className="size-8 text-destructive"
-                onClick={async () => { await hapusWallet(w.id); toast.success(`${w.label} dihapus.`); }}>
+                onClick={() => setHapusTarget(w)}>
                 <Trash2 className="size-4" />
               </Button>
             </li>
@@ -93,6 +107,18 @@ export function WalletManager({ wallets, projects }: { wallets: Wallet[]; projec
           </Button>
         </div>
       </ResponsiveModal>
+
+      <ConfirmDialog
+        open={!!hapusTarget}
+        onOpenChange={(v) => !v && setHapusTarget(null)}
+        judul={`Hapus ${hapusTarget?.label}?`}
+        deskripsi={
+          hapusTarget && dipakai(hapusTarget.id) > 0
+            ? `Wallet ini masih dipakai di ${dipakai(hapusTarget.id)} garapan — bakal ikut kelepas dari situ. Gak bisa dibalikin.`
+            : "Gak bisa dibalikin."
+        }
+        onConfirm={konfirmasiHapusWallet}
+      />
     </>
   );
 }
