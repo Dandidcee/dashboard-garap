@@ -1,5 +1,5 @@
 import { Judul } from "@/components/app-shell";
-import { DueList } from "@/components/due-list";
+import { DueSection } from "@/components/due-section";
 import { ProfitChart } from "@/components/profit-chart";
 import { getLedger, getProjects, getSettings } from "@/lib/queries";
 import { hitungDue, rekapPeriode } from "@/lib/due";
@@ -28,9 +28,9 @@ export default async function DashboardPage() {
       <section className="mb-8">
         <div className="mb-3 flex items-baseline justify-between">
           <h2 className="font-bold">Perlu digarap</h2>
-          <span className="text-sm text-muted-foreground tnum">{due.length} item</span>
+          <span className="hidden text-sm text-muted-foreground tnum md:inline">{due.length} item</span>
         </div>
-        <DueList items={due} />
+        <DueSection items={due} />
       </section>
 
       <section className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-3">
