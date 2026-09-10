@@ -7,10 +7,14 @@ import { cn } from "@/lib/utils"
 
 const Drawer = ({
   shouldScaleBackground = true,
+  // vaul geser drawer ke atas pas keyboard muncul tapi gak selalu balik turun pas
+  // keyboard ditutup (bug dikenal di Android Chrome) — mending kita yang atur sendiri.
+  repositionInputs = false,
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Root>) => (
   <DrawerPrimitive.Root
     shouldScaleBackground={shouldScaleBackground}
+    repositionInputs={repositionInputs}
     {...props}
   />
 )

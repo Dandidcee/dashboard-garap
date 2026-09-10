@@ -10,6 +10,7 @@ import { ResponsiveModal } from "./responsive-modal";
 import { ConfirmDialog } from "./confirm-dialog";
 import { ComboboxInput } from "./combobox-input";
 import { CHAIN_PRESET } from "@/lib/chains";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -66,19 +67,26 @@ export function WalletManager({ wallets, projects }: { wallets: Wallet[]; projec
           {wallets.map((w) => (
             <li key={w.id} className="flex items-center gap-3 rounded-lg border border-border/70 bg-card p-3">
               <div className="min-w-0 flex-1">
-                <p className="font-semibold leading-tight tracking-tight">{w.label}</p>
-                <p className="truncate text-xs text-muted-foreground">
-                  {w.address || "tanpa alamat"}{w.chain ? ` · ${w.chain}` : ""}
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <p className="truncate font-semibold leading-tight tracking-tight">{w.label}</p>
+                  {w.chain && (
+                    <Badge variant="secondary" className="shrink-0 px-1.5 py-0 text-[10px] font-medium">{w.chain}</Badge>
+                  )}
+                </div>
+                <p className="mt-0.5 truncate font-mono text-xs text-muted-foreground">
+                  {w.address || "Belum ada alamat"}
                 </p>
-                <p className="mt-0.5 text-xs text-muted-foreground tnum">Dipakai di {dipakai(w.id)} garapan</p>
+                {dipakai(w.id) > 0 && (
+                  <p className="mt-0.5 text-xs text-muted-foreground tnum">Dipakai di {dipakai(w.id)} garapan</p>
+                )}
               </div>
               {w.address && (
-                <Button variant="ghost" size="icon" className="size-8"
+                <Button variant="ghost" size="icon" className="size-8 shrink-0"
                   onClick={() => { navigator.clipboard.writeText(w.address!); toast.success("Alamat disalin."); }}>
                   <Copy className="size-4" />
                 </Button>
               )}
-              <Button variant="ghost" size="icon" className="size-8 text-destructive"
+              <Button variant="ghost" size="icon" className="size-8 shrink-0 text-destructive"
                 onClick={() => setHapusTarget(w)}>
                 <Trash2 className="size-4" />
               </Button>

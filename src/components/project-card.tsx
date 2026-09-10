@@ -251,8 +251,11 @@ export function ProjectCard({
               <ul className="space-y-1.5">
                 {p.wallets.map((w) => (
                   <li key={w.id} className="rounded-lg border border-border/70 bg-secondary/30 p-2.5 text-sm">
-                    <p className="font-medium">{w.label}{w.chain && <span className="ml-1.5 text-xs text-muted-foreground">{w.chain}</span>}</p>
-                    {w.address && <p className="truncate text-xs text-muted-foreground">{w.address}</p>}
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <p className="font-medium tracking-tight">{w.label}</p>
+                      {w.chain && <Badge variant="secondary" className="px-1.5 py-0 text-[10px] font-medium">{w.chain}</Badge>}
+                    </div>
+                    {w.address && <p className="mt-0.5 truncate font-mono text-xs text-muted-foreground">{w.address}</p>}
                   </li>
                 ))}
               </ul>
