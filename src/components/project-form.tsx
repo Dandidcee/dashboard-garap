@@ -16,6 +16,8 @@ import { cn, pesanError } from "@/lib/utils";
 const JENIS: Jenis[] = ["testnet", "nft", "retro", "general", "daily"];
 const STATUS: Status[] = ["belum", "digarap", "selesai", "drop"];
 const WL: WlStatus[] = ["belum", "wl", "fcfs", "gtd"];
+// "Belum dapat WL" kepanjangan buat tombol 4 kolom - versi pendek biar gak wrap 2 baris.
+const LABEL_WL_TOMBOL: Record<WlStatus, string> = { belum: "Belum", wl: "WL", fcfs: "FCFS", gtd: "GTD" };
 
 const garisJenis: Record<Jenis, string> = {
   testnet: "border-jenis-testnet bg-jenis-testnet/10 text-jenis-testnet",
@@ -168,11 +170,11 @@ export function ProjectForm({
                   <button
                     key={w} type="button" onClick={() => setWlStatus(w)}
                     className={cn(
-                      "rounded-md border py-2 text-xs font-semibold transition-colors",
+                      "whitespace-nowrap rounded-md border py-2 text-xs font-semibold transition-colors",
                       wlStatus === w ? "border-jenis-nft bg-jenis-nft/15 text-jenis-nft" : "border-border text-muted-foreground"
                     )}
                   >
-                    {LABEL_WL[w]}
+                    {LABEL_WL_TOMBOL[w]}
                   </button>
                 ))}
               </div>
