@@ -9,6 +9,8 @@ self.addEventListener("push", (event) => {
       data: { url: data.url || "/" },
       vibrate: [80, 40, 80],
       tag: data.title,
+      renotify: true,
+      requireInteraction: true,
     })
   );
 });

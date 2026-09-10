@@ -20,7 +20,8 @@ async function kirim(sub: unknown, judul: string, isi: string, url = "/") {
   siapkanVapid();
   await webpush.sendNotification(
     sub as webpush.PushSubscription,
-    JSON.stringify({ title: judul, body: isi, url })
+    JSON.stringify({ title: judul, body: isi, url }),
+    { urgency: "high" }
   );
 }
 
