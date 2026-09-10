@@ -84,7 +84,7 @@ export function DueList({ items }: { items: { project: Project; alasan: string; 
         open={!!konfirmasiTarget}
         onOpenChange={(v) => !v && setKonfirmasiTarget(null)}
         judul={`Tandai ${konfirmasiTarget?.nama} udah digarap?`}
-        deskripsi='Status garapan ini bakal diubah jadi "Lagi digarap" dan ilang dari daftar Perlu digarap.'
+        deskripsi='Statusnya jadi "Lagi digarap" dan ilang dari daftar ini.'
         labelKonfirmasi="Udah digarap"
         onConfirm={tandaiSudahGarap}
       />

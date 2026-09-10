@@ -195,7 +195,7 @@ export function ProjectForm({
                 <Label htmlFor="md">Tanggal & jam mint</Label>
                 <Input id="md" type="datetime-local" value={mintDate} onChange={(e) => setMintDate(e.target.value)} />
                 <p className="text-xs text-muted-foreground">
-                  Jam mulai notif diatur di halaman Pengaturan. Ubah tanggal ini bakal nyalain lagi notif kalau sebelumnya udah dikonfirmasi.
+                  Jam mulai notif diatur di Pengaturan. Ganti tanggal ini nyalain notifnya lagi kalau tadinya udah dikonfirmasi.
                 </p>
               </div>
             ) : (
@@ -216,8 +216,7 @@ export function ProjectForm({
               placeholder="Kosongin kalau belum keluar modal"
             />
             <p className="text-xs text-muted-foreground">
-              Otomatis kecatat sebagai modal keluar buat rekap profit. Modal tambahan berikutnya
-              dicatat lewat tombol <b>Catat uang</b> di kartu garapannya.
+              Otomatis kecatat sebagai modal keluar. Modal tambahan berikutnya lewat tombol <b>Catat uang</b> di kartu garapannya.
             </p>
           </div>
         )}

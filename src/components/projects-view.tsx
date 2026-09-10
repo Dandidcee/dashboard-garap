@@ -35,9 +35,6 @@ export function ProjectsView({ projects, wallets, ledger }: { projects: Project[
     });
   }, [projects, tab, statusTab, cari]);
 
-  const jumlah = (j: string) => (j === "semua" ? projects.length : projects.filter((p) => p.jenis === j).length);
-  const jumlahStatus = (s: string) => (s === "semua" ? projects.length : projects.filter((p) => p.status === s).length);
-
   function bukaBaru() {
     setEdit(null);
     setFormOpen(true);
@@ -63,7 +60,6 @@ export function ProjectsView({ projects, wallets, ledger }: { projects: Project[
               {TAB.map((t) => (
                 <SelectItem key={t} value={t}>
                   {t === "semua" ? "Semua jenis" : LABEL_JENIS[t as Jenis]}
-                  <span className="ml-1.5 text-muted-foreground tnum">({jumlah(t)})</span>
                 </SelectItem>
               ))}
             </SelectContent>
@@ -74,7 +70,6 @@ export function ProjectsView({ projects, wallets, ledger }: { projects: Project[
               {STATUS_TAB.map((s) => (
                 <SelectItem key={s} value={s}>
                   {s === "semua" ? "Semua status" : LABEL_STATUS[s as Status]}
-                  <span className="ml-1.5 text-muted-foreground tnum">({jumlahStatus(s)})</span>
                 </SelectItem>
               ))}
             </SelectContent>

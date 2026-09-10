@@ -108,8 +108,8 @@ export function SettingsForm({ awal }: { awal: Settings }) {
           </div>
         </div>
         <p className="text-xs text-muted-foreground">
-          {s.nft_jam >= 24 && `≈ ${(s.nft_jam / 24).toFixed(1).replace(/\.0$/, "")} hari sebelum jadwal mint. `}
-          Sesudah masuk window itu, notifnya kekirim ulang tiap 30 menit sampai lo tekan <b>Konfirmasi</b> di dashboard.
+          Notif mulai {s.nft_jam >= 24 ? `${(s.nft_jam / 24).toFixed(1).replace(/\.0$/, "")} hari` : `${s.nft_jam} jam`} sebelum
+          jadwal mint, terus diulang tiap 30 menit sampai lo tekan <b>Konfirmasi</b>.
         </p>
       </div>
 
