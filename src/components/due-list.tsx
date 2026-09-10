@@ -86,6 +86,7 @@ export function DueList({ items }: { items: { project: Project; alasan: string; 
         judul={`Tandai ${konfirmasiTarget?.nama} udah digarap?`}
         deskripsi='Statusnya jadi "Lagi digarap" dan ilang dari daftar ini.'
         labelKonfirmasi="Udah digarap"
+        variant="default"
         onConfirm={tandaiSudahGarap}
       />
     </>
