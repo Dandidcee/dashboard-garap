@@ -93,7 +93,7 @@ export function ProjectsView({ projects, wallets, ledger }: { projects: Project[
           )}
         </div>
       ) : (
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {hasil.map((p) => (
             <ProjectCard
               key={p.id} p={p}

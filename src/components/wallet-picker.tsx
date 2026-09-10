@@ -36,8 +36,7 @@ export function WalletPicker({
   const [chain, setChain] = useState("");
   const [loading, setLoading] = useState(false);
   const [cari, setCari] = useState("");
-  // Belum ada wallet dipilih -> langsung kebuka biar gak perlu klik dulu.
-  const [dropdownBuka, setDropdownBuka] = useState(() => terpilih.length === 0 && semua.length > 0);
+  const [dropdownBuka, setDropdownBuka] = useState(false);
 
   const toggle = (id: string) =>
     onChange(terpilih.includes(id) ? terpilih.filter((x) => x !== id) : [...terpilih, id]);
@@ -80,8 +79,8 @@ export function WalletPicker({
       ) : (
         <DropdownMenu open={dropdownBuka} onOpenChange={(v) => { setDropdownBuka(v); if (!v) setCari(""); }}>
           <DropdownMenuTrigger asChild>
-            <Button type="button" variant="outline" className="w-full justify-between font-normal">
-              <span className="truncate text-left">
+            <Button type="button" variant="outline" className="w-full min-w-0 justify-between font-normal">
+              <span className="min-w-0 truncate text-left">
                 {terpilih.length === 0
                   ? "Pilih wallet"
                   : semua.filter((w) => terpilih.includes(w.id)).map((w) => w.label).join(", ")}

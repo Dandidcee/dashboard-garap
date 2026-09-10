@@ -19,8 +19,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-dvh md:flex">
-      {/* Desktop: sidebar */}
-      <aside className="hidden w-56 shrink-0 border-r border-border/60 p-4 md:block">
+      {/* Desktop: sidebar — nempel diem pas konten di sebelahnya di-scroll */}
+      <aside className="sticky top-0 hidden h-dvh w-56 shrink-0 overflow-y-auto border-r border-border/60 p-4 md:block">
         <div className="mb-8 px-2">
           <div className="mb-4 flex items-center justify-between">
             <p className="text-lg font-extrabold leading-tight tracking-tight">Rekap Airdrop</p>
@@ -57,8 +57,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <div className="flex-1 pb-24 md:pb-8">
-        <div className="mx-auto max-w-4xl px-4 py-5 md:px-8 md:py-8">{children}</div>
+      <div className="min-w-0 flex-1 pb-24 md:pb-8">
+        <div className="mx-auto max-w-screen-2xl px-4 py-5 md:px-10 md:py-8">{children}</div>
       </div>
 
       {/* Mobile: tab bar bawah */}
