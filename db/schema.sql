@@ -75,6 +75,7 @@ create table if not exists credential_folders (
 create table if not exists credentials (
   id         uuid primary key default gen_random_uuid(),
   folder_id  uuid not null references credential_folders(id) on delete cascade,
+  nama       text not null,   -- misal "Discord", "Email utama"
   akun       text not null,   -- username atau email
   website    text,            -- opsional
   sandi      text not null,

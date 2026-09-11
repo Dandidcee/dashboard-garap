@@ -38,6 +38,7 @@ function BarisSandi({ sandi }: { sandi: string }) {
 export function CredentialsView({ folderId, credentials }: { folderId: string; credentials: Credential[] }) {
   const [formOpen, setFormOpen] = useState(false);
   const [edit, setEdit] = useState<Credential | null>(null);
+  const [nama, setNama] = useState("");
   const [akun, setAkun] = useState("");
   const [website, setWebsite] = useState("");
   const [sandi, setSandi] = useState("");
@@ -47,22 +48,23 @@ export function CredentialsView({ folderId, credentials }: { folderId: string; c
 
   function bukaBaru() {
     setEdit(null);
-    setAkun(""); setWebsite(""); setSandi(""); setTampilSandi(false);
+    setNama(""); setAkun(""); setWebsite(""); setSandi(""); setTampilSandi(false);
     setFormOpen(true);
   }
 
   function bukaEdit(c: Credential) {
     setEdit(c);
-    setAkun(c.akun); setWebsite(c.website ?? ""); setSandi(c.sandi); setTampilSandi(false);
+    setNama(c.nama); setAkun(c.akun); setWebsite(c.website ?? ""); setSandi(c.sandi); setTampilSandi(false);
     setFormOpen(true);
   }
 
   async function submit() {
+    if (!nama.trim()) return toast.error("Nama belum diisi.");
     if (!akun.trim()) return toast.error("Username/email belum diisi.");
     if (!sandi) return toast.error("Sandi belum diisi.");
     setLoading(true);
     try {
-      await simpanCredential({ id: edit?.id, folder_id: folderId, akun, website, sandi });
+      await simpanCredential({ id: edit?.id, folder_id: folderId, nama, akun, website, sandi });
       toast.success(edit ? "Kredensial diubah." : "Kredensial ditambahkan.");
       setFormOpen(false);
     } catch (e) {
@@ -76,7 +78,7 @@ export function CredentialsView({ folderId, credentials }: { folderId: string; c
     if (!hapusTarget) return;
     try {
       await hapusCredential(hapusTarget.id);
-      toast.success(`${hapusTarget.akun} dihapus.`);
+      toast.success(`${hapusTarget.nama} dihapus.`);
     } catch (e) {
       toast.error(pesanError(e, "Gagal menghapus."));
     } finally {
@@ -101,20 +103,21 @@ export function CredentialsView({ folderId, credentials }: { folderId: string; c
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
-                    <p className="truncate font-semibold leading-tight tracking-tight">{c.akun}</p>
+                    <p className="truncate font-semibold leading-tight tracking-tight">{c.nama}</p>
                     {c.website && (
                       <a href={c.website} target="_blank" rel="noreferrer" className="shrink-0 text-muted-foreground hover:text-primary">
                         <ExternalLink className="size-3.5" />
                       </a>
                     )}
                   </div>
+                  <p className="mt-0.5 truncate text-xs text-muted-foreground">{c.akun}</p>
                   <BarisSandi sandi={c.sandi} />
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="size-8 shrink-0">
                       <MoreVertical className="size-4" />
-                      <span className="sr-only">Menu {c.akun}</span>
+                      <span className="sr-only">Menu {c.nama}</span>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
@@ -146,8 +149,12 @@ export function CredentialsView({ folderId, credentials }: { folderId: string; c
       <ResponsiveModal open={formOpen} onOpenChange={setFormOpen} judul={edit ? "Ubah kredensial" : "Kredensial baru"}>
         <div className="space-y-4">
           <div className="space-y-2">
+            <Label htmlFor="cnama">Nama</Label>
+            <Input id="cnama" value={nama} onChange={(e) => setNama(e.target.value)} placeholder="Misal: Discord, Email utama" autoFocus />
+          </div>
+          <div className="space-y-2">
             <Label htmlFor="cakun">Username / email</Label>
-            <Input id="cakun" value={akun} onChange={(e) => setAkun(e.target.value)} placeholder="nama@email.com" autoFocus />
+            <Input id="cakun" value={akun} onChange={(e) => setAkun(e.target.value)} placeholder="nama@email.com" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="cweb">Website login (opsional)</Label>
@@ -177,7 +184,7 @@ export function CredentialsView({ folderId, credentials }: { folderId: string; c
       <ConfirmDialog
         open={!!hapusTarget}
         onOpenChange={(v) => !v && setHapusTarget(null)}
-        judul={`Hapus ${hapusTarget?.akun}?`}
+        judul={`Hapus ${hapusTarget?.nama}?`}
         deskripsi="Gak bisa dibalikin."
         onConfirm={konfirmasiHapus}
       />

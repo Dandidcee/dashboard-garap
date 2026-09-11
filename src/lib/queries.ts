@@ -81,7 +81,7 @@ export async function getFolder(id: string): Promise<CredentialFolder | null> {
 
 export async function getCredentials(folderId: string): Promise<Credential[]> {
   const { rows } = await db().query(
-    "select * from credentials where folder_id = $1 order by lower(akun)",
+    "select * from credentials where folder_id = $1 order by lower(nama)",
     [folderId]
   );
   return rows as Credential[];

@@ -215,22 +215,23 @@ export async function hapusFolder(id: string) {
   segarkan();
 }
 
-export async function simpanCredential(input: { id?: string; folder_id: string; akun: string; website?: string; sandi: string }) {
+export async function simpanCredential(input: { id?: string; folder_id: string; nama: string; akun: string; website?: string; sandi: string }) {
+  const nama = input.nama.trim();
   const akun = input.akun.trim();
   const website = input.website?.trim() || null;
   const sandi = input.sandi;
 
   if (input.id) {
     await db().query(
-      "update credentials set akun=$1, website=$2, sandi=$3 where id=$4",
-      [akun, website, sandi, input.id]
+      "update credentials set nama=$1, akun=$2, website=$3, sandi=$4 where id=$5",
+      [nama, akun, website, sandi, input.id]
     );
     segarkan();
     return { id: input.id };
   }
   const res = await db().query(
-    "insert into credentials (folder_id, akun, website, sandi) values ($1,$2,$3,$4) returning id",
-    [input.folder_id, akun, website, sandi]
+    "insert into credentials (folder_id, nama, akun, website, sandi) values ($1,$2,$3,$4,$5) returning id",
+    [input.folder_id, nama, akun, website, sandi]
   );
   segarkan();
   return { id: res.rows[0].id as string };

@@ -31,6 +31,7 @@ export type CredentialFolder = {
 export type Credential = {
   id: string;
   folder_id: string;
+  nama: string;
   akun: string;
   website: string | null;
   sandi: string;
