@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronRight, Eye, CheckCircle2 } from "lucide-react";
+import { ChevronRight, Eye, CheckCircle2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { tandaiPantauan } from "@/app/actions";
 import type { Pantauan } from "@/lib/types";
@@ -32,7 +32,13 @@ function Daftar({ items }: { items: Pantauan[] }) {
     <ul className="space-y-2">
       {items.map((p) => (
         <li key={p.id} className="flex items-center gap-3 rounded-lg border border-border/70 bg-card p-3">
-          <p className="min-w-0 flex-1 truncate font-bold tracking-tight">x.com/{p.handle}</p>
+          <a
+            href={`https://x.com/${p.handle}`} target="_blank" rel="noreferrer"
+            className="flex min-w-0 flex-1 items-center gap-1.5 font-bold tracking-tight hover:text-primary"
+          >
+            <span className="truncate">x.com/{p.handle}</span>
+            <ExternalLink className="size-3.5 shrink-0 text-muted-foreground" />
+          </a>
           <Button size="sm" variant="outline" className="shrink-0" onClick={() => tandai(p)}>
             <CheckCircle2 className="mr-1.5 size-4" /> Tandai
           </Button>
