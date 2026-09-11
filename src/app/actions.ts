@@ -93,10 +93,13 @@ export async function tandaiDigarap(id: string) {
   segarkan();
 }
 
-/** Sama kayak tandaiDigarap, tapi dipakai pas garapannya belum punya wallet — pasang walletnya sekalian. */
-export async function garapDenganWallet(id: string, walletId: string) {
+/** Sama kayak tandaiDigarap, tapi dipakai pas garapannya belum punya wallet — pasang wallet-walletnya sekalian. */
+export async function garapDenganWallet(id: string, walletIds: string[]) {
   await withTransaction(async (client) => {
-    await client.query("insert into project_wallets (project_id, wallet_id) values ($1,$2)", [id, walletId]);
+    if (walletIds.length) {
+      const placeholders = walletIds.map((_, i) => `($1, $${i + 2})`).join(", ");
+      await client.query(`insert into project_wallets (project_id, wallet_id) values ${placeholders}`, [id, ...walletIds]);
+    }
     await client.query("update projects set last_done_at=now(), last_notif=null where id=$1", [id]);
   });
   segarkan();
@@ -117,10 +120,13 @@ export async function ubahStatusProject(id: string, status: Status) {
   segarkan();
 }
 
-/** Sama kayak ubahStatusProject, tapi dipakai pas garapannya belum punya wallet — pasang walletnya sekalian. */
-export async function ubahStatusDenganWallet(id: string, walletId: string, status: Status) {
+/** Sama kayak ubahStatusProject, tapi dipakai pas garapannya belum punya wallet — pasang wallet-walletnya sekalian. */
+export async function ubahStatusDenganWallet(id: string, walletIds: string[], status: Status) {
   await withTransaction(async (client) => {
-    await client.query("insert into project_wallets (project_id, wallet_id) values ($1,$2)", [id, walletId]);
+    if (walletIds.length) {
+      const placeholders = walletIds.map((_, i) => `($1, $${i + 2})`).join(", ");
+      await client.query(`insert into project_wallets (project_id, wallet_id) values ${placeholders}`, [id, ...walletIds]);
+    }
     await client.query("update projects set status=$2 where id=$1", [id, status]);
   });
   segarkan();

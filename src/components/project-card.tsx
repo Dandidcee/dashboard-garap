@@ -334,7 +334,7 @@ export function ProjectCard({
         project={pilihWallet ? p : null}
         wallets={wallets}
         onOpenChange={setPilihWallet}
-        onSubmit={(walletId) => garapDenganWallet(p.id, walletId)}
+        onSubmit={(walletIds) => garapDenganWallet(p.id, walletIds)}
       />
     </>
   );

@@ -4,11 +4,12 @@ import { useState } from "react";
 import { CheckCircle2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { tandaiDigarap, konfirmasiMint, ubahStatusProject, garapDenganWallet, ubahStatusDenganWallet } from "@/app/actions";
-import { LABEL_JENIS, type Project, type Wallet } from "@/lib/types";
+import { LABEL_JENIS, LABEL_STATUS, type Project, type Wallet } from "@/lib/types";
 import { cn, pesanError } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { PilihWalletDialog } from "@/components/pilih-wallet-dialog";
+import { ResponsiveModal } from "@/components/responsive-modal";
 
 type PilihWalletMode = "garap" | "status";
 
@@ -21,6 +22,7 @@ export function DueList({
 }) {
   const [konfirmasiTarget, setKonfirmasiTarget] = useState<Project | null>(null);
   const [pilihWallet, setPilihWallet] = useState<{ project: Project; mode: PilihWalletMode } | null>(null);
+  const [detail, setDetail] = useState<Project | null>(null);
 
   async function tandaiSudahGarap() {
     if (!konfirmasiTarget) return;
@@ -68,12 +70,19 @@ export function DueList({
     <>
       <ul className="space-y-2">
         {items.map(({ project: p, alasan, telat, viaStatus }) => (
-          <li key={p.id} className="flex items-center gap-3 rounded-lg border border-border/70 bg-card p-3">
+          <li
+            key={p.id}
+            role="button"
+            tabIndex={0}
+            onClick={() => setDetail(p)}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setDetail(p); } }}
+            className="flex cursor-pointer items-center gap-3 rounded-lg border border-border/70 bg-card p-3 transition-colors hover:border-foreground/30"
+          >
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5">
                 <p className="truncate font-bold leading-tight tracking-tight">{p.nama}</p>
                 {(p.fields.mint_link || p.link) && (
-                  <a href={p.fields.mint_link || p.link!} target="_blank" rel="noreferrer"
+                  <a href={p.fields.mint_link || p.link!} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}
                      className="shrink-0 text-muted-foreground hover:text-primary">
                     <ExternalLink className="size-3.5" />
                   </a>
@@ -84,7 +93,7 @@ export function DueList({
               </p>
             </div>
             {viaStatus ? (
-              <Button size="sm" variant="outline" className="shrink-0" onClick={() => udahDigarap(p)}>
+              <Button size="sm" variant="outline" className="shrink-0" onClick={(e) => { e.stopPropagation(); udahDigarap(p); }}>
                 <CheckCircle2 className="mr-1.5 size-4" /> Udah digarap
               </Button>
             ) : p.jenis === "nft" ? (
@@ -94,7 +103,8 @@ export function DueList({
                 </span>
               ) : (
                 <Button size="sm" variant="outline" className="shrink-0"
-                  onClick={async () => {
+                  onClick={async (e) => {
+                    e.stopPropagation();
                     await konfirmasiMint(p.id, p.fields);
                     toast.success(`${p.nama} dikonfirmasi, notif berhenti.`);
                   }}>
@@ -102,7 +112,7 @@ export function DueList({
                 </Button>
               )
             ) : (
-              <Button size="sm" variant="outline" className="shrink-0" onClick={() => garap(p)}>
+              <Button size="sm" variant="outline" className="shrink-0" onClick={(e) => { e.stopPropagation(); garap(p); }}>
                 <CheckCircle2 className="mr-1.5 size-4" /> Garap
               </Button>
             )}
@@ -124,12 +134,33 @@ export function DueList({
         project={pilihWallet?.project ?? null}
         wallets={wallets}
         onOpenChange={(v) => !v && setPilihWallet(null)}
-        onSubmit={async (walletId) => {
+        onSubmit={async (walletIds) => {
           if (!pilihWallet) return;
-          if (pilihWallet.mode === "garap") await garapDenganWallet(pilihWallet.project.id, walletId);
-          else await ubahStatusDenganWallet(pilihWallet.project.id, walletId, "digarap");
+          if (pilihWallet.mode === "garap") await garapDenganWallet(pilihWallet.project.id, walletIds);
+          else await ubahStatusDenganWallet(pilihWallet.project.id, walletIds, "digarap");
         }}
       />
+
+      <ResponsiveModal
+        open={!!detail}
+        onOpenChange={(v) => !v && setDetail(null)}
+        judul={detail?.nama ?? ""}
+        deskripsi={detail ? `${LABEL_JENIS[detail.jenis]} · ${LABEL_STATUS[detail.status]}` : undefined}
+      >
+        <div className="space-y-4">
+          {detail?.link && (
+            <a href={detail.link} target="_blank" rel="noreferrer"
+               className="inline-flex items-center gap-1.5 text-sm font-medium text-primary underline underline-offset-2">
+              Buka link project <ExternalLink className="size-3.5" />
+            </a>
+          )}
+          {detail?.catatan ? (
+            <div className="rounded-lg border border-border/70 bg-secondary/40 p-3 text-sm">{detail.catatan}</div>
+          ) : (
+            <p className="text-sm text-muted-foreground">Gak ada catatan.</p>
+          )}
+        </div>
+      </ResponsiveModal>
     </>
   );
 }
