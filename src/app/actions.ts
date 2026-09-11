@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { db, withTransaction } from "@/lib/db";
 import type { Jenis, Status } from "@/lib/types";
 import { AUTH_COOKIE, authCookieOptions } from "@/lib/auth";
+import { bersihkanHandle } from "@/lib/utils";
 
 function segarkan() {
   revalidatePath("/");
@@ -13,6 +14,7 @@ function segarkan() {
   revalidatePath("/wallets");
   revalidatePath("/settings");
   revalidatePath("/credentials", "layout");
+  revalidatePath("/pantauan");
 }
 
 /* ---------------- Login ---------------- */
@@ -183,11 +185,13 @@ export async function simpanSettings(input: {
   testnet_interval_hari: number;
   daily_jam: number;
   nft_jam: number;
+  pantauan_jam: number;
 }) {
   await db().query(
-    `update settings set timezone=$1, testnet_jam=$2, testnet_interval_hari=$3, daily_jam=$4, nft_jam=$5, updated_at=now()
+    `update settings set timezone=$1, testnet_jam=$2, testnet_interval_hari=$3, daily_jam=$4, nft_jam=$5,
+     pantauan_jam=$6, updated_at=now()
      where id=1`,
-    [input.timezone, input.testnet_jam, input.testnet_interval_hari, input.daily_jam, input.nft_jam]
+    [input.timezone, input.testnet_jam, input.testnet_interval_hari, input.daily_jam, input.nft_jam, input.pantauan_jam]
   );
   segarkan();
 }
@@ -234,5 +238,31 @@ export async function simpanCredential(input: { id?: string; folder_id: string; 
 
 export async function hapusCredential(id: string) {
   await db().query("delete from credentials where id=$1", [id]);
+  segarkan();
+}
+
+/* ---------------- Pantauan ---------------- */
+
+/** Terima banyak baris sekaligus (paste bulk) atau satu doang — dibersihin & di-dedupe di sini. */
+export async function tambahPantauan(mentah: string[]) {
+  const bersih = [...new Set(mentah.map(bersihkanHandle).filter(Boolean))];
+  if (!bersih.length) return { jumlah: 0 };
+  const placeholders = bersih.map((_, i) => `($${i + 1})`).join(", ");
+  const res = await db().query(
+    `insert into pantauan (handle) values ${placeholders} on conflict (lower(handle)) do nothing returning id`,
+    bersih
+  );
+  segarkan();
+  return { jumlah: res.rowCount ?? 0 };
+}
+
+export async function hapusPantauan(id: string) {
+  await db().query("delete from pantauan where id=$1", [id]);
+  segarkan();
+}
+
+/** Tombol "Udah dipantau hari ini". */
+export async function tandaiPantauan(id: string) {
+  await db().query("update pantauan set last_done_at=now(), last_notif=null where id=$1", [id]);
   segarkan();
 }

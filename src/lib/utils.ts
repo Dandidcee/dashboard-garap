@@ -30,3 +30,14 @@ export function jamLokal(tz: string, at: Date = new Date()) {
 export function tanggalLokal(tz: string, at: Date = new Date()) {
   return new Intl.DateTimeFormat("en-CA", { timeZone: tz }).format(at);
 }
+
+/** "@handle", "x.com/handle", "https://twitter.com/handle/" dll -> "handle" polos. */
+export function bersihkanHandle(raw: string) {
+  let h = raw.trim()
+    .replace(/^https?:\/\//i, "")
+    .replace(/^(www\.)?(x\.com|twitter\.com)\//i, "")
+    .replace(/^@/, "");
+  const potong = h.search(/[/?#]/);
+  if (potong !== -1) h = h.slice(0, potong);
+  return h.trim();
+}

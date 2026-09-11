@@ -1,20 +1,22 @@
 import { Judul } from "@/components/app-shell";
 import { DueSection } from "@/components/due-section";
+import { PantauanSection } from "@/components/pantauan-section";
 import { ProfitChartLazy } from "@/components/profit-chart-lazy";
-import { getLedger, getProjects, getSettings, getWallets } from "@/lib/queries";
-import { hitungDue, rekapPeriode } from "@/lib/due";
+import { getLedger, getProjects, getSettings, getWallets, getPantauan } from "@/lib/queries";
+import { hitungDue, hitungDuePantauan, rekapPeriode } from "@/lib/due";
 import { rupiah, tanggalLokal, cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  const [projects, settings, ledger, wallets] = await Promise.all([
-    getProjects(), getSettings(), getLedger(), getWallets(),
+  const [projects, settings, ledger, wallets, pantauan] = await Promise.all([
+    getProjects(), getSettings(), getLedger(), getWallets(), getPantauan(),
   ]);
 
   const due = hitungDue(projects, settings);
   const dailyPlan = due.filter((d) => d.project.jenis === "testnet" || d.project.jenis === "daily");
   const perluDigarap = due.filter((d) => d.project.jenis !== "testnet" && d.project.jenis !== "daily");
+  const duePantauan = hitungDuePantauan(pantauan, settings);
 
   const perBulan = rekapPeriode(ledger, "bulan");
   const bulanIni = tanggalLokal(settings.timezone).slice(0, 7);
@@ -45,6 +47,15 @@ export default async function DashboardPage() {
           <span className="hidden text-sm text-muted-foreground tnum md:inline">{dailyPlan.length} item</span>
         </div>
         <DueSection items={dailyPlan} wallets={wallets} />
+      </section>
+
+      {/* Akun yang belum dipantau hari ini */}
+      <section className="mb-9">
+        <div className="mb-4 flex items-baseline justify-between">
+          <h2 className="text-base font-extrabold tracking-tight">Pantauan</h2>
+          <span className="hidden text-sm text-muted-foreground tnum md:inline">{duePantauan.length} item</span>
+        </div>
+        <PantauanSection items={duePantauan} />
       </section>
 
       <section className="mb-9 grid grid-cols-2 gap-3 md:grid-cols-3">

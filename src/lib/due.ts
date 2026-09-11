@@ -1,4 +1,4 @@
-import type { Project, Settings } from "./types";
+import type { Pantauan, Project, Settings } from "./types";
 import { tanggalLokal } from "./utils";
 
 export type Due = {
@@ -81,6 +81,15 @@ export function hitungDue(projects: Project[], s: Settings, now = new Date()): D
   }
 
   return out.sort((a, b) => a.urutan - b.urutan);
+}
+
+/** Handle yang belum dipantau hari ini — dipakai bareng dashboard dan cron, sama kayak hitungDue. */
+export function hitungDuePantauan(items: Pantauan[], s: Settings, now = new Date()): Pantauan[] {
+  const hariIni = tanggalLokal(s.timezone, now);
+  return items.filter((p) => {
+    const terakhir = p.last_done_at ? tanggalLokal(s.timezone, new Date(p.last_done_at)) : null;
+    return terakhir !== hariIni;
+  });
 }
 
 /** Ringkasan uang per bulan / per tahun dari tabel ledger. */

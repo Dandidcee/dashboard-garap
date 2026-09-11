@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import webpush from "web-push";
 import { db } from "@/lib/db";
-import { getProjects, getSettings } from "@/lib/queries";
-import { hitungDue } from "@/lib/due";
+import { getProjects, getSettings, getPantauan } from "@/lib/queries";
+import { hitungDue, hitungDuePantauan } from "@/lib/due";
 import { jamLokal } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -23,6 +23,14 @@ async function kirim(sub: unknown, judul: string, isi: string, url = "/") {
     JSON.stringify({ title: judul, body: isi, url }),
     { urgency: "high" }
   );
+}
+
+/** true kalau langganan push-nya udah gak valid lagi (dan sekalian dibersihin). */
+async function langgananKedaluwarsa(e: unknown) {
+  const status = (e as { statusCode?: number }).statusCode;
+  if (status !== 404 && status !== 410) return false;
+  await db().query("update settings set push_subscription=null where id=1");
+  return true;
 }
 
 /**
@@ -54,6 +62,8 @@ export async function GET(req: Request) {
   const jam = jamLokal(settings.timezone, now);
   const projects = await getProjects();
   const due = hitungDue(projects, settings, now);
+  const pantauan = await getPantauan();
+  const duePantauan = hitungDuePantauan(pantauan, settings, now);
 
   const jamPerJenis: Record<string, number> = {
     testnet: settings.testnet_jam,
@@ -84,14 +94,25 @@ export async function GET(req: Request) {
       await db().query("update projects set last_notif=$2 where id=$1", [p.id, now.toISOString()]);
       dikirim.push(p.nama);
     } catch (e) {
-      // langganan sudah kedaluwarsa -> bersihkan supaya gak error terus
-      const status = (e as { statusCode?: number }).statusCode;
-      if (status === 404 || status === 410) {
-        await db().query("update settings set push_subscription=null where id=1");
+      if (await langgananKedaluwarsa(e)) {
         return NextResponse.json({ error: "langganan kedaluwarsa, nyalakan ulang di Pengaturan" }, { status: 200 });
       }
     }
   }
 
-  return NextResponse.json({ jam, total_due: due.length, dikirim });
+  for (const p of settings.pantauan_jam === jam ? duePantauan : []) {
+    if (p.last_notif && now.getTime() - new Date(p.last_notif).getTime() < 12 * 3_600_000) continue;
+
+    try {
+      await kirim(settings.push_subscription, "Pantauan hari ini", `Cek @${p.handle}`, `https://x.com/${p.handle}`);
+      await db().query("update pantauan set last_notif=$2 where id=$1", [p.id, now.toISOString()]);
+      dikirim.push(`@${p.handle}`);
+    } catch (e) {
+      if (await langgananKedaluwarsa(e)) {
+        return NextResponse.json({ error: "langganan kedaluwarsa, nyalakan ulang di Pengaturan" }, { status: 200 });
+      }
+    }
+  }
+
+  return NextResponse.json({ jam, total_due: due.length + duePantauan.length, dikirim });
 }

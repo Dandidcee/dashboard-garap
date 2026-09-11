@@ -37,6 +37,14 @@ export type Credential = {
   created_at: string;
 };
 
+export type Pantauan = {
+  id: string;
+  handle: string;
+  last_done_at: string | null;
+  last_notif: string | null;
+  created_at: string;
+};
+
 export type LedgerEntry = {
   id: string;
   project_id: string;
@@ -70,6 +78,7 @@ export type Settings = {
   daily_jam: number;
   /** berapa jam sebelum jadwal mint notif NFT mulai dikirim (bukan lagi jam-of-day) */
   nft_jam: number;
+  pantauan_jam: number;
   push_subscription: unknown | null;
 };
 

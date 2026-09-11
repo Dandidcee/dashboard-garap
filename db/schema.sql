@@ -58,6 +58,7 @@ create table if not exists settings (
   testnet_interval_hari int  not null default 3,
   daily_jam             int  not null default 8,
   nft_jam               int  not null default 20,
+  pantauan_jam          int  not null default 8,
   push_subscription     jsonb,
   updated_at            timestamptz not null default now()
 );
@@ -80,8 +81,18 @@ create table if not exists credentials (
   created_at timestamptz not null default now()
 );
 
+-- Akun (misal X/Twitter) yang dipantau tiap hari.
+create table if not exists pantauan (
+  id           uuid primary key default gen_random_uuid(),
+  handle       text not null,          -- tanpa @, misal "aiceking27"
+  last_done_at timestamptz,            -- terakhir dipantau
+  last_notif   timestamptz,            -- anti notif dobel
+  created_at   timestamptz not null default now()
+);
+
 create index if not exists idx_projects_jenis    on projects (jenis);
 create index if not exists idx_projects_nama     on projects (lower(nama));
 create index if not exists idx_ledger_project    on ledger (project_id);
 create index if not exists idx_ledger_tanggal    on ledger (tanggal);
 create index if not exists idx_credentials_folder on credentials (folder_id);
+create unique index if not exists idx_pantauan_handle on pantauan (lower(handle));

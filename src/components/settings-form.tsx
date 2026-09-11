@@ -39,6 +39,7 @@ export function SettingsForm({ awal }: { awal: Settings }) {
         testnet_interval_hari: s.testnet_interval_hari,
         daily_jam: s.daily_jam,
         nft_jam: s.nft_jam,
+        pantauan_jam: s.pantauan_jam,
       });
       toast.success("Pengaturan disimpan.");
     } catch (e) {
@@ -110,6 +111,17 @@ export function SettingsForm({ awal }: { awal: Settings }) {
         <p className="text-xs text-muted-foreground">
           Notif mulai {s.nft_jam >= 24 ? `${(s.nft_jam / 24).toFixed(1).replace(/\.0$/, "")} hari` : `${s.nft_jam} jam`} sebelum
           jadwal mint, terus diulang tiap 30 menit sampai lo tekan <b>Konfirmasi</b>.
+        </p>
+      </div>
+
+      <div className="space-y-4 rounded-lg border border-border/70 bg-card p-4">
+        <p className="text-sm font-bold tracking-tight">Pantauan</p>
+        <div className="space-y-2 sm:max-w-[50%]">
+          <Label htmlFor="pj">Jam pengingat harian</Label>
+          <PilihJam id="pj" value={s.pantauan_jam} onChange={(n) => setS({ ...s, pantauan_jam: n })} />
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Notif dikirim buat akun yang belum ditandai dipantau hari ini.
         </p>
       </div>
 

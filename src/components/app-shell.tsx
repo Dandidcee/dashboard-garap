@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, ListChecks, Wallet, KeyRound, Settings2 } from "lucide-react";
+import { LayoutGrid, ListChecks, Wallet, KeyRound, Eye, Settings2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LiveClock } from "@/components/live-clock";
@@ -12,6 +12,7 @@ const menu = [
   { href: "/projects", label: "Garapan", icon: ListChecks },
   { href: "/wallets", label: "Wallet", icon: Wallet },
   { href: "/credentials", label: "Kredensial", icon: KeyRound },
+  { href: "/pantauan", label: "Pantauan", icon: Eye },
   { href: "/settings", label: "Pengaturan", icon: Settings2 },
 ];
 

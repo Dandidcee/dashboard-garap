@@ -1,5 +1,5 @@
 import { db } from "./db";
-import type { Project, Settings, Wallet, LedgerEntry, CredentialFolder, Credential } from "./types";
+import type { Project, Settings, Wallet, LedgerEntry, CredentialFolder, Credential, Pantauan } from "./types";
 
 export async function getSettings(): Promise<Settings> {
   const { rows } = await db().query("select * from settings where id = 1");
@@ -85,4 +85,9 @@ export async function getCredentials(folderId: string): Promise<Credential[]> {
     [folderId]
   );
   return rows as Credential[];
+}
+
+export async function getPantauan(): Promise<Pantauan[]> {
+  const { rows } = await db().query("select * from pantauan order by lower(handle)");
+  return rows as Pantauan[];
 }
