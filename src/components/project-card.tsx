@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ExternalLink, MoreVertical, Pencil, Trash2, Coins, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { hapusProject, tandaiDigarap, konfirmasiMint, garapDenganWallet } from "@/app/actions";
-import { LABEL_JENIS, LABEL_STATUS, LABEL_WL, type LedgerEntry, type Project, type Wallet } from "@/lib/types";
+import { LABEL_JENIS, LABEL_STATUS, LABEL_WL, type LedgerEntry, type Project, type Wallet, type WlStatus } from "@/lib/types";
 import { rupiah, cn, pesanError } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,14 @@ function selisihHari(iso: string | null) {
 function fmtTanggal(iso: string) {
   return new Date(iso).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
 }
+
+// Beda status WL = beda warna, biar kartu NFT langsung kebaca dari jauh.
+const WARNA_WL: Record<WlStatus, { kartu: string; badge: string }> = {
+  belum: { kartu: "border-border/70", badge: "border-border text-muted-foreground" },
+  wl: { kartu: "border-jenis-nft/50 bg-jenis-nft/5", badge: "border-jenis-nft/50 text-jenis-nft" },
+  fcfs: { kartu: "border-warn/50 bg-warn/5", badge: "border-warn/50 text-warn" },
+  gtd: { kartu: "border-ok/50 bg-ok/5", badge: "border-ok/50 text-ok" },
+};
 
 function Baris({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -94,7 +102,10 @@ export function ProjectCard({
         tabIndex={0}
         onClick={() => setDetail(true)}
         onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setDetail(true); } }}
-        className="relative cursor-pointer overflow-hidden rounded-lg border border-border/70 bg-card transition-colors hover:border-foreground/30"
+        className={cn(
+          "relative cursor-pointer overflow-hidden rounded-lg border bg-card transition-colors hover:border-foreground/30",
+          p.jenis === "nft" ? WARNA_WL[p.fields.wl_status ?? "belum"].kartu : "border-border/70"
+        )}
       >
         <div className="space-y-3 p-4">
           <div className="flex items-start justify-between gap-2">
@@ -139,7 +150,7 @@ export function ProjectCard({
 
           {p.jenis === "nft" && (
             <div className="flex flex-wrap items-center gap-1.5">
-              <Badge variant="outline" className="border-jenis-nft/50 text-jenis-nft">
+              <Badge variant="outline" className={WARNA_WL[p.fields.wl_status ?? "belum"].badge}>
                 {LABEL_WL[p.fields.wl_status ?? "belum"]}
               </Badge>
               {p.fields.mint_price != null && (
