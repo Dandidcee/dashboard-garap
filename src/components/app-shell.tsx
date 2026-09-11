@@ -1,20 +1,26 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, ListChecks, Wallet, KeyRound, Eye, Settings2 } from "lucide-react";
+import { LayoutGrid, ListChecks, Wallet, KeyRound, Eye, Settings2, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LiveClock } from "@/components/live-clock";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 
 const menu = [
   { href: "/", label: "Ringkasan", icon: LayoutGrid },
   { href: "/projects", label: "Garapan", icon: ListChecks },
   { href: "/wallets", label: "Wallet", icon: Wallet },
-  { href: "/credentials", label: "Kredensial", icon: KeyRound },
   { href: "/pantauan", label: "Pantauan", icon: Eye },
+  { href: "/credentials", label: "Kredensial", icon: KeyRound },
   { href: "/settings", label: "Pengaturan", icon: Settings2 },
 ];
+
+// Di HP cuma 4 tab + "Lainnya" biar gak sempit; sisanya kebuka lewat drawer.
+const menuUtamaMobile = menu.slice(0, 4);
+const menuLainnyaMobile = menu.slice(4);
 
 function isAktif(path: string, href: string) {
   return href === "/" ? path === "/" : path === href || path.startsWith(`${href}/`);
@@ -22,6 +28,8 @@ function isAktif(path: string, href: string) {
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
+  const [lainnyaBuka, setLainnyaBuka] = useState(false);
+  const lainnyaAktif = menuLainnyaMobile.some((m) => isAktif(path, m.href));
 
   return (
     <div className="min-h-dvh md:flex">
@@ -70,7 +78,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Mobile: tab bar bawah */}
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border/60 bg-background/95 backdrop-blur md:hidden">
         <div className="flex" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
-          {menu.map((m) => {
+          {menuUtamaMobile.map((m) => {
             const aktif = isAktif(path, m.href);
             return (
               <Link
@@ -86,8 +94,47 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </Link>
             );
           })}
+          <button
+            type="button"
+            onClick={() => setLainnyaBuka(true)}
+            className={cn(
+              "flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px]",
+              lainnyaAktif ? "text-primary" : "text-muted-foreground"
+            )}
+          >
+            <MoreHorizontal className="size-5" />
+            Lainnya
+          </button>
         </div>
       </nav>
+
+      {/* Mobile: drawer buat menu yang gak muat di tab bar */}
+      <Drawer open={lainnyaBuka} onOpenChange={setLainnyaBuka}>
+        <DrawerContent>
+          <DrawerHeader className="text-left">
+            <DrawerTitle>Lainnya</DrawerTitle>
+          </DrawerHeader>
+          <nav className="space-y-1 p-4 pt-0" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 1rem)" }}>
+            {menuLainnyaMobile.map((m) => {
+              const aktif = isAktif(path, m.href);
+              return (
+                <Link
+                  key={m.href}
+                  href={m.href}
+                  onClick={() => setLainnyaBuka(false)}
+                  className={cn(
+                    "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors",
+                    aktif ? "bg-secondary font-semibold text-foreground" : "text-muted-foreground hover:bg-secondary/50"
+                  )}
+                >
+                  <m.icon className="size-4" />
+                  {m.label}
+                </Link>
+              );
+            })}
+          </nav>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }
