@@ -12,6 +12,7 @@ function segarkan() {
   revalidatePath("/projects");
   revalidatePath("/wallets");
   revalidatePath("/settings");
+  revalidatePath("/credentials", "layout");
 }
 
 /* ---------------- Login ---------------- */
@@ -188,5 +189,50 @@ export async function simpanSettings(input: {
      where id=1`,
     [input.timezone, input.testnet_jam, input.testnet_interval_hari, input.daily_jam, input.nft_jam]
   );
+  segarkan();
+}
+
+/* ---------------- Kredensial ---------------- */
+
+export async function simpanFolder(input: { id?: string; nama: string }) {
+  const nama = input.nama.trim();
+  if (input.id) {
+    await db().query("update credential_folders set nama=$1 where id=$2", [nama, input.id]);
+    segarkan();
+    return { id: input.id };
+  }
+  const res = await db().query("insert into credential_folders (nama) values ($1) returning id", [nama]);
+  segarkan();
+  return { id: res.rows[0].id as string };
+}
+
+export async function hapusFolder(id: string) {
+  await db().query("delete from credential_folders where id=$1", [id]);
+  segarkan();
+}
+
+export async function simpanCredential(input: { id?: string; folder_id: string; akun: string; website?: string; sandi: string }) {
+  const akun = input.akun.trim();
+  const website = input.website?.trim() || null;
+  const sandi = input.sandi;
+
+  if (input.id) {
+    await db().query(
+      "update credentials set akun=$1, website=$2, sandi=$3 where id=$4",
+      [akun, website, sandi, input.id]
+    );
+    segarkan();
+    return { id: input.id };
+  }
+  const res = await db().query(
+    "insert into credentials (folder_id, akun, website, sandi) values ($1,$2,$3,$4) returning id",
+    [input.folder_id, akun, website, sandi]
+  );
+  segarkan();
+  return { id: res.rows[0].id as string };
+}
+
+export async function hapusCredential(id: string) {
+  await db().query("delete from credentials where id=$1", [id]);
   segarkan();
 }

@@ -1,5 +1,5 @@
 import { db } from "./db";
-import type { Project, Settings, Wallet, LedgerEntry } from "./types";
+import type { Project, Settings, Wallet, LedgerEntry, CredentialFolder, Credential } from "./types";
 
 export async function getSettings(): Promise<Settings> {
   const { rows } = await db().query("select * from settings where id = 1");
@@ -54,4 +54,35 @@ export async function getLedger(projectId?: string): Promise<LedgerEntry[]> {
     ? await db().query("select * from ledger where project_id = $1 order by tanggal desc", [projectId])
     : await db().query("select * from ledger order by tanggal desc");
   return rows as LedgerEntry[];
+}
+
+export async function getCredentialFolders(): Promise<CredentialFolder[]> {
+  const { rows } = await db().query(`
+    select f.*, count(c.id)::int as jumlah
+    from credential_folders f
+    left join credentials c on c.folder_id = f.id
+    group by f.id
+    order by lower(f.nama)
+  `);
+  return rows as CredentialFolder[];
+}
+
+export async function getFolder(id: string): Promise<CredentialFolder | null> {
+  const { rows } = await db().query(
+    `select f.*, count(c.id)::int as jumlah
+     from credential_folders f
+     left join credentials c on c.folder_id = f.id
+     where f.id = $1
+     group by f.id`,
+    [id]
+  );
+  return (rows[0] as CredentialFolder) ?? null;
+}
+
+export async function getCredentials(folderId: string): Promise<Credential[]> {
+  const { rows } = await db().query(
+    "select * from credentials where folder_id = $1 order by lower(akun)",
+    [folderId]
+  );
+  return rows as Credential[];
 }

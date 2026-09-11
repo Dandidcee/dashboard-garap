@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, ListChecks, Wallet, Settings2 } from "lucide-react";
+import { LayoutGrid, ListChecks, Wallet, KeyRound, Settings2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LiveClock } from "@/components/live-clock";
@@ -11,8 +11,13 @@ const menu = [
   { href: "/", label: "Ringkasan", icon: LayoutGrid },
   { href: "/projects", label: "Garapan", icon: ListChecks },
   { href: "/wallets", label: "Wallet", icon: Wallet },
+  { href: "/credentials", label: "Kredensial", icon: KeyRound },
   { href: "/settings", label: "Pengaturan", icon: Settings2 },
 ];
+
+function isAktif(path: string, href: string) {
+  return href === "/" ? path === "/" : path === href || path.startsWith(`${href}/`);
+}
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
@@ -30,7 +35,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
         <nav className="space-y-1">
           {menu.map((m) => {
-            const aktif = path === m.href;
+            const aktif = isAktif(path, m.href);
             return (
               <Link
                 key={m.href}
@@ -65,7 +70,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border/60 bg-background/95 backdrop-blur md:hidden">
         <div className="flex" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
           {menu.map((m) => {
-            const aktif = path === m.href;
+            const aktif = isAktif(path, m.href);
             return (
               <Link
                 key={m.href}

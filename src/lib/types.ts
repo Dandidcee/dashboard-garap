@@ -21,6 +21,22 @@ export type Wallet = {
   catatan: string | null;
 };
 
+export type CredentialFolder = {
+  id: string;
+  nama: string;
+  created_at: string;
+  jumlah: number;
+};
+
+export type Credential = {
+  id: string;
+  folder_id: string;
+  akun: string;
+  website: string | null;
+  sandi: string;
+  created_at: string;
+};
+
 export type LedgerEntry = {
   id: string;
   project_id: string;
